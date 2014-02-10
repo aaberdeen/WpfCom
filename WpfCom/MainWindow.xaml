@@ -1,0 +1,385 @@
+﻿<Window x:Class="WpfApplication1.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:WpfApplication1"
+        Title="Davis Derby          MineWATCH WiPAN Comms Window" Icon="DD64.ico" Height="495" Width="1000" Top="300" Topmost="False" Left="0" Closed="Window_Closed">
+
+    <Window.Resources>
+
+        <HierarchicalDataTemplate DataType="{x:Type local:TreeReader}"
+                               ItemsSource="{Binding Path=Children}">
+            <Border BorderBrush="Black"
+                BorderThickness="1">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Reader: " />
+                    <TextBlock Text="{Binding Path=Name}" />
+                </StackPanel>
+            </Border>
+        </HierarchicalDataTemplate>
+
+        <HierarchicalDataTemplate DataType="{x:Type local:TreeTag}"
+                               ItemsSource="{Binding Path=Children}">
+            <Border BorderBrush="Green"
+                BorderThickness="1">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Tag: " />
+                    <TextBlock Text="{Binding Path=Name}" />
+                </StackPanel>
+            </Border>
+        </HierarchicalDataTemplate>
+
+        <HierarchicalDataTemplate DataType="{x:Type local:TreeValue}"
+                               ItemsSource="{Binding Path=Children}">
+            <Border BorderBrush="Red"
+                BorderThickness="1">
+                <StackPanel Orientation="Horizontal">
+                    <!--<TextBlock Text="TTL: " />-->
+                    <!--<TextBlock Text="{Binding Path=TTL}" />-->
+
+                    <TextBlock Text=" Sequ: " />
+                    <TextBlock Text="{Binding Path=PktSequence}" />
+                    <TextBlock Text=" Length: " />
+                    <TextBlock Text="{Binding Path=PktLength}" />
+                    <TextBlock Text=" BrSequ: " />
+                    <TextBlock Text="{Binding Path=BrSequ}" />
+
+                    <!--<TextBlock Text=")" />-->
+                </StackPanel>
+            </Border>
+        </HierarchicalDataTemplate>
+
+        <Style TargetType="TreeViewItem">
+            <Setter Property="IsExpanded" Value="False" />
+        </Style>
+
+        <DataTemplate x:Key="DropTemplate">
+            <ContextMenu>
+                <MenuItem Header="Open" />
+                <MenuItem Header="Closed" />
+
+            </ContextMenu>
+
+        </DataTemplate>
+
+        <Style TargetType= "{x:Type DataGridColumnHeader}">
+            <!--<Setter Property="VerticalContentAlignment" Value="Center" />-->
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="SeparatorBrush" Value="DarkRed" />
+            <Setter Property="FontWeight" Value="Black" />
+
+
+        </Style>
+
+
+
+
+    </Window.Resources>
+
+    <Grid>
+        <Grid Name="grid1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="150*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="23*" />
+                <RowDefinition Height="45*" />
+                <RowDefinition Height="210*" />
+                <RowDefinition Height="33" />
+            </Grid.RowDefinitions>
+            <TabControl TabStripPlacement="Top"  Grid.Column="1" Grid.Row="1" Grid.RowSpan="2">
+                <TabItem Header="All">
+                    <DataGrid AutoGenerateColumns="True" Name="dataGridView1" Grid.Row="0" Grid.Column="1" IsManipulationEnabled="True" Grid.RowSpan="2" AlternatingRowBackground="Gainsboro" CanUserSortColumns="True" CanUserAddRows="false" ItemsSource="{Binding allTagList}" >
+                        <!--Sorting="dataGridView1_Sorting"-->
+                    </DataGrid>
+                </TabItem>
+                <TabItem Header="Men">
+                    <DataGrid AutoGenerateColumns="True" Name="dataGridMen" Grid.Row="0" Grid.Column="1" IsManipulationEnabled="True" Grid.RowSpan="2" AlternatingRowBackground="Gainsboro" CanUserSortColumns="True" CanUserAddRows="false"  ItemsSource="{Binding allTagList}" >
+                        <!--Sorting="dataGridView1_Sorting"-->
+                        <DataGrid.RowStyle>
+                            <Style TargetType="{x:Type DataGridRow}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding endPointType, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="Router">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding endPointType, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="Key">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding endPointType, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="Coord">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding endPointType, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="Gas">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.RowStyle>
+                    </DataGrid>
+                </TabItem>
+                <TabItem Header="Gas">
+                    <DataGrid AutoGenerateColumns="True" Name="dataGridGas" Grid.Row="0" Grid.Column="1" IsManipulationEnabled="True" Grid.RowSpan="2" AlternatingRowBackground="Gainsboro" CanUserSortColumns="True" CanUserAddRows="false"  ItemsSource="{Binding allTagList}" >
+                        <!--Sorting="dataGridView1_Sorting"-->
+                        <DataGrid.RowStyle>
+                            <Style TargetType="{x:Type DataGridRow}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding endPointType, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="Router">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding endPointType, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="Key">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding endPointType, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="Coord">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding endPointType, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="Man">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.RowStyle>
+                    </DataGrid>
+                </TabItem>
+                <TabItem Header="Routers">
+                    <DataGrid AutoGenerateColumns="True" Name="dataGridRouter" Grid.Row="0" Grid.Column="1" IsManipulationEnabled="True" Grid.RowSpan="2" AlternatingRowBackground="Gainsboro" CanUserSortColumns="True" CanUserAddRows="false"  ItemsSource="{Binding allTagList}" >
+                        <!--Sorting="dataGridView1_Sorting"-->
+                        <DataGrid.RowStyle>
+                            <Style TargetType="{x:Type DataGridRow}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding endPointType, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="Man">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding endPointType, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="Key">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding endPointType, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="Coord">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding endPointType, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="Gas">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.RowStyle>
+                    </DataGrid>
+                </TabItem>
+                <TabItem Header="Pullkey">
+                    <DataGrid AutoGenerateColumns="False" Name="dataGridPullkey" Grid.Row="0" Grid.Column="1" IsManipulationEnabled="True" Grid.RowSpan="2" AlternatingRowBackground="Gainsboro" CanUserSortColumns="True" CanUserAddRows="false"  MouseLeftButtonUp="DataGrid_MouseLeftButtonUp" ItemsSource="{Binding allTagList}" >
+                        <!--Sorting="dataGridView1_Sorting"-->
+                        <DataGrid.RowStyle>
+                            <Style TargetType="{x:Type DataGridRow}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding endPointType, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="Man">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding endPointType, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="Router">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding endPointType, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="Coord">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding endPointType, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="Gas">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+
+                                    </DataTrigger>
+
+                                    <DataTrigger Binding="{Binding ReaderAdd, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="0000000000000000">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.RowStyle>
+
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="TTL" Binding="{Binding TTL}" />
+                            <DataGridTextColumn Header="zoneID" Binding="{Binding zoneID}" />
+                            <DataGridTextColumn Header="unitID" Binding="{Binding unitID}" />
+                            <DataGridTemplateColumn Header="Image" Width="SizeToCells" IsReadOnly="True">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Image Height="80" Source="{Binding Image}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+
+                            </DataGridTemplateColumn>
+
+
+                            <DataGridCheckBoxColumn Header="remoteLockout" Binding="{Binding remoteLockout, Mode=TwoWay}"  >
+                                <DataGridCheckBoxColumn.CellStyle>
+                                    <Style TargetType="DataGridCell">
+                                        <Setter Property="ToolTip" Value="Indicates if Remote Lockout has been applied to this key"></Setter>
+                                        <Setter Property="ContentTemplate">
+                                            <Setter.Value>
+                                                <DataTemplate>
+                                                    <CheckBox x:Name="cb"
+                                                      IsChecked="{Binding remoteLockout, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                                                      
+                                                      VerticalAlignment="Center" 
+                                                      HorizontalAlignment="Center" IsEnabled="True" >
+                                                    </CheckBox>
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding remoteLockout, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="True">
+                                                <Setter Property="Background" Value="Red"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding remoteLockout, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="False">
+                                                <Setter Property="Background" Value="Green"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGridCheckBoxColumn.CellStyle>
+                            </DataGridCheckBoxColumn>
+                            <DataGridCheckBoxColumn Header="switchError" Binding="{Binding switchError, Mode=OneWay}" >
+                                <DataGridCheckBoxColumn.CellStyle>
+                                    <Style TargetType="DataGridCell">
+                                        <Setter Property="ToolTip" Value="Indicates if this key has detected a faulty switch"></Setter>
+                                        <Setter Property="ContentTemplate">
+                                            <Setter.Value>
+                                                <DataTemplate>
+                                                    <CheckBox x:Name="cb"
+                                                      IsChecked="{Binding switchError, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" 
+                                                      VerticalAlignment="Center" 
+                                                      HorizontalAlignment="Center" IsEnabled="False" >
+                                                    </CheckBox>
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding switchError, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="True">
+                                                <Setter Property="Background" Value="Red"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding switchError, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="False">
+                                                <Setter Property="Background" Value="Green"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGridCheckBoxColumn.CellStyle>
+                            </DataGridCheckBoxColumn>
+                            <DataGridCheckBoxColumn Header="RLO_Error" Binding="{Binding RLO_Error, Mode=OneWay}"  >
+                                <DataGridCheckBoxColumn.CellStyle>
+                                    <Style TargetType="DataGridCell">
+                                        <Setter Property="ToolTip" Value="Indicates if the remote lockout has failed KEY FAULT"></Setter>
+                                        <Setter Property="ContentTemplate">
+                                            <Setter.Value>
+                                                <DataTemplate>
+                                                    <CheckBox x:Name="cb"
+                                                      IsChecked="{Binding RLO_Error, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" 
+                                                      VerticalAlignment="Center" 
+                                                      HorizontalAlignment="Center" IsEnabled="False" >
+                                                    </CheckBox>
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding RLO_Error, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="True">
+                                                <Setter Property="Background" Value="Red"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding RLO_Error, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="False">
+                                                <Setter Property="Background" Value="Green"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGridCheckBoxColumn.CellStyle>
+                            </DataGridCheckBoxColumn>
+                            <DataGridCheckBoxColumn Header="keyShort" Binding="{Binding keyShort, Mode=OneWay}"  >
+                                <DataGridCheckBoxColumn.CellStyle>
+                                    <Style TargetType="DataGridCell">
+                                        <Setter Property="ToolTip" Value="Indicates if the key has detected a short"></Setter>
+                                        <Setter Property="ContentTemplate">
+                                            <Setter.Value>
+                                                <DataTemplate>
+                                                    <CheckBox x:Name="cb"
+                                                      IsChecked="{Binding keyShort, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" 
+                                                      VerticalAlignment="Center" 
+                                                      HorizontalAlignment="Center" IsEnabled="False" >
+                                                    </CheckBox>
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding keyShort, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="True">
+                                                <Setter Property="Background" Value="Red"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding keyShort, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" Value="False">
+                                                <Setter Property="Background" Value="Green"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGridCheckBoxColumn.CellStyle>
+                            </DataGridCheckBoxColumn>
+
+                            <DataGridTextColumn Header="dcVoltsState" Binding="{Binding dcVoltsState}" />
+                            <!--<DataGridTextColumn Header="adcReadError1" Binding="{Binding adcReadError1}" />
+                            <DataGridTextColumn Header="adcReadError2" Binding="{Binding adcReadError2}" />-->
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+                <TabItem Header="Console" MouseLeftButtonDown="TabItem_MouseLeftButtonDown" PreviewMouseDown="TabItem_PreviewMouseDown">
+                    <Canvas HorizontalAlignment="Left" Height="231" VerticalAlignment="Top" Width="978">
+                        <TextBox Name="consoleText" Height="361" Width="878" VerticalScrollBarVisibility="Auto" PreviewMouseRightButtonDown="consoleText_PreviewMouseRightButtonDown"/>
+                        <Button Content="Clear Log" Canvas.Left="893" Canvas.Top="10" Width="75" Click="Button_Click" Margin="0"/>
+                    </Canvas>
+
+                    <!--Text="{Binding Path=text,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged }">-->
+
+                </TabItem>
+
+            </TabControl>
+
+
+            <Menu Name="menu1" Grid.ColumnSpan="2">
+                <MenuItem Header="File">
+                    <MenuItem Header="Load" Click="MenuItem_Click_1"></MenuItem>
+                    <MenuItem Header="Save" Click="MenuItem_Click_2"></MenuItem>
+                    <MenuItem Header="Exit" Click="MenuItem_Exit_Click" />
+                </MenuItem>
+                <MenuItem Header="Config">
+                    <MenuItem Header="Coordinators" Click="MenuItem_Click_5"></MenuItem>
+                    <MenuItem Header="Port" Click="MenuItem_Port_Click" />
+                    <MenuItem Header="Message" Click="MenuItem_Message_Click" />
+                    <MenuItem Header="DataBase" Click="MenuItem_DataBase_Click" />
+                    <MenuItem Header="Miners Names" Click="MenuItem_Click"></MenuItem>
+                </MenuItem>
+                <MenuItem Header="Start" Name="MenuStart" Click="MenuItem_Start_Click" IsEnabled="True"></MenuItem>
+                <MenuItem Header="Stop" Name="MenuStop" Click="MenuItem_Stop_Click" IsEnabled="False"></MenuItem>
+                <MenuItem Header="Clear" Name="MenuClear" Click="MenuClear_Click"></MenuItem>
+
+
+            </Menu>
+            <TreeView Name="treeView" Grid.Row="1" PreviewMouseRightButtonDown="treeView1_PreviewMouseRightButtonDown" Grid.RowSpan="2">
+
+            </TreeView>
+            <StatusBar Grid.Row="3" Name="statusBar1" Grid.ColumnSpan="2">
+
+                <StatusBarItem>
+                    <TextBlock Name="StatusText" Width="495" Height="24" Background="Wheat"></TextBlock>
+                </StatusBarItem>
+                <StatusBarItem>
+                    <TextBlock Name="versionText" Width="110" Height="24" Background="Wheat"></TextBlock>
+                </StatusBarItem>
+
+
+            </StatusBar>
+
+        </Grid>
+    </Grid>
+</Window>

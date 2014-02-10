@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS locationdb (
+  TagID int(11) NOT NULL AUTO_INCREMENT,
+  TagAdd varchar(45) DEFAULT NULL,
+  ReaderAdd varchar(45) DEFAULT NULL,
+  PktLqi int(11) DEFAULT NULL,
+  TOFdistance int(11) DEFAULT NULL,
+  TOFmac varchar(45) DEFAULT NULL,
+  TimeStamp datetime DEFAULT NULL,
+  TOF_MAC_LQI_LIFETIME int(11) DEFAULT NULL,
+  RxLQI int(11) DEFAULT NULL,
+  Name varchar(45) DEFAULT NULL,
+  sequence int(11) DEFAULT NULL,
+  CH4 float DEFAULT NULL,
+  CO int(11) DEFAULT NULL,
+  O2 float DEFAULT NULL,
+  CO2 float DEFAULT NULL,
+  endPointType varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`TagID`)
+) ENGINE=InnoDB AUTO_INCREMENT=1637 DEFAULT CHARSET=latin1;
+	
