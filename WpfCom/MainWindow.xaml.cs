@@ -343,7 +343,10 @@ namespace WpfApplication1
                     {
                         if (allLists.listToReturn[i].Children[j].endPointType == "Key")
                         {
-                            _errorLog.write(string.Format("ttl= {0}, reader= {1}, type= {2}", allLists.listToReturn[i].Children[j].Children[0].TTL, allLists.listToReturn[i].Children[j].Name, allLists.listToReturn[i].Children[j].endPointType));
+                            if (allLists.listToReturn[i].Children[j].readerAddress != "0000000000000000")
+                            {
+                                _errorLog.write(string.Format("ttl= {0}, reader= {1}, type= {2}", allLists.listToReturn[i].Children[j].Children[0].TTL, allLists.listToReturn[i].Children[j].Name, allLists.listToReturn[i].Children[j].endPointType));
+                            }
                         }
                     }
                     

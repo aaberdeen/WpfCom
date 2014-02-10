@@ -35,7 +35,7 @@ namespace WpfApplication1
         //private int _RSSIdistance;
         //private int _TOFerror;
         //private string _TOFmac;
-        //private string _ReaderAdd;
+        private string _readerAddress;
         //private int _RxLQI;
 
 
@@ -81,6 +81,19 @@ namespace WpfApplication1
                 _endPointType = value;
             }
         }
+
+        public string readerAddress
+        {
+            get
+            {
+                return _readerAddress;
+            }
+            set
+            {
+                _readerAddress = value;
+            }
+        }
+
         public uint TTL
         {
             get

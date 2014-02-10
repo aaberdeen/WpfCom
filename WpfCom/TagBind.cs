@@ -524,7 +524,7 @@ namespace WpfApplication1
         }
         public uint u58
         {
-            // get { return _u58; }
+            //get { return _u58; }
             set
             {
                 if (_u58 != value)

@@ -136,6 +136,7 @@ namespace WpfApplication1
                         {
                             Name = WorkingTag.TagAdd,
                             endPointType = WorkingTag.endPointType,
+                            readerAddress = WorkingTag.ReaderAdd,
                             Children = new BindingList<Node>() 
                                                                 {
                                                                   new TreeValue (){TTL = 10, PktLength = WorkingTag.PktLength, PktSequence = WorkingTag.PktSequence, BrSequ = WorkingTag.BrSequ}

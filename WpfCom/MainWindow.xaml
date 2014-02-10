@@ -221,7 +221,7 @@
                             </DataGridTemplateColumn>
 
 
-                            <DataGridCheckBoxColumn Header="remoteLockout" Binding="{Binding remoteLockout, Mode=TwoWay}"  >
+                            <DataGridCheckBoxColumn Header="remoteLockout" Binding="{Binding remoteLockout, Mode=OneWay}"  >
                                 <DataGridCheckBoxColumn.CellStyle>
                                     <Style TargetType="DataGridCell">
                                         <Setter Property="ToolTip" Value="Indicates if Remote Lockout has been applied to this key"></Setter>
@@ -229,7 +229,7 @@
                                             <Setter.Value>
                                                 <DataTemplate>
                                                     <CheckBox x:Name="cb"
-                                                      IsChecked="{Binding remoteLockout, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                                                      IsChecked="{Binding remoteLockout, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" 
                                                       
                                                       VerticalAlignment="Center" 
                                                       HorizontalAlignment="Center" IsEnabled="True" >
