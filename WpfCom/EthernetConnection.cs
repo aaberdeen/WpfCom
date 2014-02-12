@@ -21,7 +21,7 @@ namespace WpfApplication1
         public Queue<int> ethernetReciveQueue = new Queue<int>();
         public Queue<int> ethernetTransmitQueue = new Queue<int>();
        // public Queue<int> brSequReciveQueue = new Queue<int>();
-        public AutoResetEvent ethernetSendWaitHandle;
+        private AutoResetEvent _ethernetSendWaitHandle;
         private volatile bool _shouldStopListen;
         private volatile bool _shouldStopSend;
         private volatile bool _shouldStopMain;
@@ -78,7 +78,7 @@ namespace WpfApplication1
 
 
 
-            ethernetSendWaitHandle = new AutoResetEvent(false);
+            _ethernetSendWaitHandle = new AutoResetEvent(false);
 
             if (DBcon)
             {
@@ -314,6 +314,12 @@ namespace WpfApplication1
 
             }
         }
+
+        public void TCPSend()
+        {
+            _ethernetSendWaitHandle.Set();
+        }
+
         private void TCPSendThread()
         {
 
@@ -321,7 +327,7 @@ namespace WpfApplication1
             {
                 while (this.tcpClient.Connected)   //(ethernetPort.bActive)
                 {
-                    ethernetSendWaitHandle.WaitOne(); // blocks thread untill signall is recived 
+                    _ethernetSendWaitHandle.WaitOne(); // blocks thread untill signall is recived 
                     
                     int queueTempLength = ethernetTransmitQueue.Count;
                     while (ethernetTransmitQueue.Count != 0)
@@ -565,8 +571,6 @@ namespace WpfApplication1
 
                         lock (PortArray)
                         {
-
-                            //ExtractData(ref PktSequence, ref TagAdd, ref ReaderAdd, ref TOFmac);                      //Put data into class lists
                             WorkingTag.UpdateTag(PortArray, ckSumCalc);
                         }
                             
@@ -574,70 +578,60 @@ namespace WpfApplication1
                         // so now we are goint to put this in a tag queue so we can have a tread pool to handle lots of data
                         //now lets toggle between two queues so we can use two threads to service
 
-                        //if (queueToggle == 0)
-                        //{
+
+                        if (WorkingTag.CheckSum == WorkingTag.calculatedCheckSum)
+                        {
                             _allLists.workingTagQueue0.Enqueue(WorkingTag);
                             tidExtractDataWaitHandle.Set();
-                        //}
-                        //if (queueToggle == 1)
-                        //{
-                        //    allListsRef.workingTagQueue1.Enqueue(WorkingTag);
-                        //    tidExtractData1WaitHandle.Set();
-                        //}
-                        
 
-                    //    ExtractData(WorkingTag);
-                        // ckSum = WorkingTag.CheckSum;
-
-                        //Recive message need to add back in
-                        if (WorkingTag.BrCmd > 0)
-                        {
-
-                        //    messageWindow1.rxMessageWaitHandle.Set();
-
-                        //    lock (messageWindow1.rxMessageQueue)
-                        //    {
-                        //        messageWindow1.rxMessageQueue.Enqueue(WorkingTag);
-                        //        Tag debug = messageWindow1.rxMessageQueue.Peek();
-                        //        if (debug.BrCmd == 0)
-                        //        {
-                        //        }
-
-                        //    }
-
-                        //    //need to create an event
-                        //    //messageWindow1.textRxMessage.Text = "hello";
-
-                        }
-
-                        if (WorkingTag.PktType != "0")
-                        {
-                        }
-
-                        if (WorkingTag.ReaderAdd == "0000000000000000") // router has joined the network
-                        {
-
-                            if (WorkingTag.PktEvent == 0x8000) // Left Network
+                            if (WorkingTag.BrCmd > 0)
                             {
-                                WorkingTag.BrCmd = 0xEF;     //these BrCmds I have made up just to send messages in this app
-                            }
-                            if (WorkingTag.PktEvent == 0x4000) // Joined Network
-                            {
-                                WorkingTag.BrCmd = 0xf0;    //these BrCmds I have made up just to send messages in this app
+
+                                //    messageWindow1.rxMessageWaitHandle.Set();
+
+                                //    lock (messageWindow1.rxMessageQueue)
+                                //    {
+                                //        messageWindow1.rxMessageQueue.Enqueue(WorkingTag);
+                                //        Tag debug = messageWindow1.rxMessageQueue.Peek();
+                                //        if (debug.BrCmd == 0)
+                                //        {
+                                //        }
+
+                                //    }
+
+                                //    //need to create an event
+                                //    //messageWindow1.textRxMessage.Text = "hello";
+
                             }
 
-
-                            lock (_allLists.rxMessageQueue)
+                            if (WorkingTag.PktType != "0")
                             {
-                                _allLists.rxMessageQueue.Enqueue(WorkingTag);
-                                
                             }
-                            _messageWindow1.rxMessageWaitHandle.Set();
+
+                            if (WorkingTag.ReaderAdd == "0000000000000000") // router has joined the network
+                            {
+
+                                if (WorkingTag.PktEvent == 0x8000) // Left Network
+                                {
+                                    WorkingTag.BrCmd = 0xEF;     //these BrCmds I have made up just to send messages in this app
+                                }
+                                if (WorkingTag.PktEvent == 0x4000) // Joined Network
+                                {
+                                    WorkingTag.BrCmd = 0xf0;    //these BrCmds I have made up just to send messages in this app
+                                }
+                                lock (_allLists.rxMessageQueue)
+                                {
+                                    _allLists.rxMessageQueue.Enqueue(WorkingTag);
+
+                                }
+                                _messageWindow1.rxMessageWaitHandle.Set();
+                            }
                         }
-
-
-
-                        
+                        else
+                        {
+                            checkSumFails++;
+                            Debug.WriteLine("checksum fail count = {0}", checkSumFails);
+                        }
 
                         InFrameFlag = 0;
                         PortArrayCount = 0;
@@ -646,26 +640,6 @@ namespace WpfApplication1
                         {
                             PortArray[i] = 0;                          //Clear Down Array
                         }
-
-                        //DEBUG***************************************************
-
-                        //try
-                        //{
-
-                        //    using (StreamWriter w = File.AppendText("c:\\log.txt"))
-                        //    {
-                        //        Log("\n", w);
-                        //    }
-                        //}
-                        //catch
-                        //{
-                        //}
-
-                        //*******************************************************
-
-
-
-
                     }
 
                     if (PortArrayCount < PortArrayMax - 1)
@@ -707,8 +681,8 @@ namespace WpfApplication1
             // string TagReaderAddTemp = tag.TagAdd + tag.ReaderAdd; // TagAddTemp + ReaderAddTemp;
             // need to make list of readers and the tags that they have
 
-            if (tag.calculatedCheckSum == tag.CheckSum)
-            {
+            //if (tag.calculatedCheckSum == tag.CheckSum)
+            //{
 
                 if (_DBsetup.trackingEnabled)
                 {
@@ -775,13 +749,13 @@ namespace WpfApplication1
                     //  }));
 
                 }
-            }
-            else
-            {
-                checkSumFails++;
-                Debug.WriteLine("checksum fail count = {0}", checkSumFails);
+            //}
+            //else
+            //{
+            //    checkSumFails++;
+            //    Debug.WriteLine("checksum fail count = {0}", checkSumFails);
                 
-            }
+            //}
 
         }
 

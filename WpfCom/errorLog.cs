@@ -10,20 +10,36 @@ namespace WpfApplication1
     {
         public void write(Exception e, string errorCode)
         {
-            using (StreamWriter w = File.AppendText("debugLog.txt"))
+            try
             {
-                w.WriteLine(DateTime.Now);
-                w.WriteLine("{0}", errorCode);
-                w.WriteLine("{0}", e.ToString());
+                StreamWriter w = File.AppendText("debugLog.txt");
+                using (w)
+                {
+                    w.WriteLine(DateTime.Now);
+                    w.WriteLine("{0}", errorCode);
+                    w.WriteLine("{0}", e.ToString());
+                }
             }
+            catch
+            { }
+
         }
         public void write(string errorCode)
         {
-            using (StreamWriter w = File.AppendText("debugLog.txt"))
+            try
             {
-                w.WriteLine(string.Format("{0} - {1}" ,DateTime.Now, errorCode));
+
+                StreamWriter w = File.AppendText("debugLog.txt");
+                using (w)
+                {
+                    w.WriteLine(string.Format("{0} - {1}", DateTime.Now, errorCode));
+                }
             }
+            catch
+            {
+            }
+
         }
-      
+
     }
 }

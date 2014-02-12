@@ -143,7 +143,7 @@ namespace WpfApplication1
             updatConsoleText();
             foreach (KeyValuePair<string, EthernetConnection> ethCon in myEthConnList)
             {
-                ethCon.Value.ethernetSendWaitHandle.Set(); //kicks send thread to send a packet to check link
+                ethCon.Value.TCPSend(); //kicks send thread to send a packet to check link
 
             }
 
@@ -533,7 +533,7 @@ namespace WpfApplication1
 
                     }
                 }
-                ethCon.Value.ethernetSendWaitHandle.Set();
+                ethCon.Value.TCPSend();
             }
         }
 
@@ -550,8 +550,6 @@ namespace WpfApplication1
             if (parent.SelectedItem != null)
             {
                 var children = parent.SelectedItem as TreeTag;  //TreeViewItem;
-                // var chName = children as DBConnect.TagBind;
-                //string MAC = children.Header.ToString();
                 string MAC = children.Name;
 
                 messageWindow1.textBox1.Text = MAC.Insert(8, ":");
