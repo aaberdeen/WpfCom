@@ -16,54 +16,56 @@ namespace WpfApplication1
     class EthernetConnection
     {
         private errorLog _errorLog = new errorLog();
-        public Thread _TCPSendThread;
-        public Thread _TCPListenThread;
-        public Queue<int> ethernetReciveQueue = new Queue<int>();
-        public Queue<int> ethernetTransmitQueue = new Queue<int>();
-       // public Queue<int> brSequReciveQueue = new Queue<int>();
+        private Thread _TCPSendThread;
+        private Thread _TCPListenThread;
+        private Queue<byte> _ethernetReciveQueue = new Queue<byte>();
+        private Queue<int> _ethernetTransmitQueue = new Queue<int>();
         private AutoResetEvent _ethernetSendWaitHandle;
         private volatile bool _shouldStopListen;
         private volatile bool _shouldStopSend;
         private volatile bool _shouldStopMain;
         private ComSetup _com;
-        DBConnect dbConnect;
+        private DBConnect _dbConnect;
         private MinersNamesForm _MNform;
         private DataBaseSetup _DBsetup;
         /* NetworkStream that will be used */
-        public NetworkStream tcpStream;
+        private NetworkStream _tcpStream;
         /* TcpClient that will connect for us */
-        public TcpClient tcpClient;
+        private TcpClient _tcpClient;
         /* Storage space */
-        public byte[] TCPrxBuffer;
-        public byte[] TCPtxBuffer;
-        public int txBufferPosition;
-        private byte InFrameFlag = 0;
-        private byte AAflag = 0;
-        private int PortArrayCount = 0;
-        private int[] PortArray = new int[200];
-        private int PortArrayMax = 200;
+        private byte[] _TCPrxBuffer;
+        private byte[] _TCPtxBuffer;
+        private int _txBufferPosition;
+        private byte _InFrameFlag = 0;
+        private byte _DLEflag = 0;
+        private int _PortArrayCount = 0;
+        private int[] _PortArray = new int[200];
+        private int _PortArrayMax = 200;
         const int DLE = 0x10;
         const int STX = 0x2;
-        private int PktLengthInt = 0;
-        Tag WorkingTag = new Tag();
+        private int _PktLengthInt = 0;
+        private Tag _WorkingTag = new Tag();
        // DBConnect dbConnectRef;
         private Lists _allLists;
-        public Thread mainThread;
+        private Thread _formFrameThread;
+        private AutoResetEvent tidFormFrameWaitHandle = new AutoResetEvent(false);
         private int _index;
-        private int checkSumFails;
+        private int _checkSumFails;
         private Message _messageWindow1;
-        public Thread tidExtractData;
-        bool _shouldStopTidExtractData;
-        public AutoResetEvent tidExtractDataWaitHandle= new AutoResetEvent(false);
+        private Thread _tidExtractData;
+        private bool _shouldStopTidExtractData;
+        private AutoResetEvent tidExtractDataWaitHandle= new AutoResetEvent(false);
        // public Thread tidExtractData1;
-        public AutoResetEvent tidExtractData1WaitHandle= new AutoResetEvent(false);
-        public UdpClient udPclient;
-        public bool udpCallbackRun;
+       // public AutoResetEvent tidExtractData1WaitHandle= new AutoResetEvent(false);
+        private UdpClient _udPclient;
+        private bool _udpCallbackRun;
+        private string _remoteIP;
+        private string _TCPport;
         private string _localIP;
         private string _udpPort;
        
 
-        public EthernetConnection(string server, string TCPport, string localIP, string udpPort, ref ComSetup com, ref MinersNamesForm MNform, ref DataBaseSetup DBsetup, bool DBcon, ref Lists allLists, int index, ref Message messageWindow1)
+        public EthernetConnection(string remoteIP, string TCPport, string localIP, string udpPort, ref ComSetup com, ref MinersNamesForm MNform, ref DataBaseSetup DBsetup, bool DBcon, ref Lists allLists, int index, ref Message messageWindow1)
         {
             _com = com;
             _MNform = MNform;
@@ -74,76 +76,73 @@ namespace WpfApplication1
             _messageWindow1 = messageWindow1;
             _localIP = localIP;
             _udpPort = udpPort;
-            
-
-
-
             _ethernetSendWaitHandle = new AutoResetEvent(false);
+            _remoteIP = remoteIP;
+            _TCPport = TCPport;
 
             if (DBcon)
             {
                 trackingDataBaseSetup();
             }
 
-            try // TCP setup
+            try
             {
-                //TCPinit(server, port);
-
-
-                if (TCPinit(server, TCPport))                        //(tcpClient.Connected)
+                if (TCPinit())                        //(tcpClient.Connected)
                 {
                     _com.coordIpList[_index].connected = true;
+                    // this is in the try because we don't want to start the treads without the TCP connecton
+                    ThreadInit();
+                    UDPInit();
                 }
-
-
-                
-
-
-                // this is in the try because we don't want to start the treads without the TCP connecton
-              ThreadInit();
-
-
-
-
-
-
             }
             catch(Exception e)
             {
                 _com.coordIpList[_index].connected = false;
                 _errorLog.write(e, "EthernetConnection Init");
             }
-
-                // Create UDP client ******************************************
-                int localPort = 4444;
-                IPEndPoint remoteSender = new IPEndPoint(IPAddress.Any, 0);
-                IPAddress udpAddress;
-                int tempInt;
-                string value = "10.1.0.44";
-                int remotePort = Convert.ToInt32(_udpPort);  // 0 listens to all ports rich uses 1000;
-                if (IPAddress.TryParse(server, out udpAddress))
-                {
-                    remoteSender.Address = udpAddress;
-                    remoteSender.Port = remotePort;
-                }
-                else if (int.TryParse(value, out tempInt) && tempInt == 0)
-                    remoteSender.Address = IPAddress.Any;
-                udpCallbackRun = true;
-             
-                udPclient = new UdpClient(localPort);
-                UdpState state = new UdpState(udPclient, remoteSender);
-               
-                udPclient.BeginReceive(new AsyncCallback(DataReceived), state);  // this is blocking 
-                
-                
-                _errorLog.write("udp setup done");
-           
-     
-            //UDP ********************************************************
-
-
         }
 
+        /// <summary>
+        /// Initalise TCP connection and then send a message to set up the UDP at the far end
+        /// </summary>
+        /// <returns></returns>
+        private bool TCPinit()
+        {
+            _tcpClient = new TcpClient(_remoteIP, Int32.Parse(_TCPport));
+            /* Store the NetworkStream */
+            _tcpStream = _tcpClient.GetStream();
+            /* Create data buffer */
+            _TCPrxBuffer = new byte[_tcpClient.ReceiveBufferSize];
+            _TCPtxBuffer = new byte[_tcpClient.SendBufferSize];
+
+            if (_tcpClient.Connected)
+            {
+                if (_tcpClient != null)
+                {
+                    if (_tcpClient.Connected)
+                    {
+                        SendUDPSetupMessage();  
+                    }
+                    else
+                    {
+                        Debug.Write("\nnot Connected");
+                    }
+                }
+                else
+                {
+                    Debug.Write("\nnot Connected");
+                }
+                return true; 
+            }
+            else
+            {
+                return false;
+            }
+        }
+  
+        /// <summary>
+        /// Initalise and start 4 treads
+        /// </summary>
         private void ThreadInit()
         {
             /* Vital: Create listening thread and assign it to ListenThread() */
@@ -155,83 +154,158 @@ namespace WpfApplication1
             _TCPSendThread.Name = "_TCPSendThread";
             _TCPSendThread.IsBackground = true;
             /*extract data thread*/
-            tidExtractData = new Thread(new ThreadStart(extractDataThread));
-            tidExtractData.Name = "tidExtractData";
-            tidExtractData.IsBackground = true;
+            _tidExtractData = new Thread(new ThreadStart(extractDataThread));
+            _tidExtractData.Name = "tidExtractData";
+            _tidExtractData.IsBackground = true;
             // tidExtractData1 = new Thread(new ThreadStart(extractDataThread1));
             /*main thread*/
-            mainThread = new Thread(new ThreadStart(mainThread1));
-            mainThread.Name = "mainThread";
-            mainThread.IsBackground = true;
+            _formFrameThread = new Thread(new ThreadStart(formFrameThread));
+            _formFrameThread.Name = "formFrameThread";
+            _formFrameThread.IsBackground = true;
 
             _TCPListenThread.Start();
             _TCPSendThread.Start();
-            mainThread.Start();
-            tidExtractData.Start();
+            _formFrameThread.Start();
+            _tidExtractData.Start();
             //tidExtractData1.Start();
         }
 
-        private bool TCPinit(string server, string port)
+        /// <summary>
+        /// Initalise UDP and set up RX call back
+        /// </summary>
+        private void UDPInit()
         {
-            tcpClient = new TcpClient(server, Int32.Parse(port));
-            /* Store the NetworkStream */
-            tcpStream = tcpClient.GetStream();
-            /* Create data buffer */
-            TCPrxBuffer = new byte[tcpClient.ReceiveBufferSize];
-            TCPtxBuffer = new byte[tcpClient.SendBufferSize];
-
-            if (tcpClient.Connected)
+            IPEndPoint remoteSender = new IPEndPoint(IPAddress.Any, 0);
+            IPAddress udpAddress;
+            int remotePort = 1000;  // 0 listens to all ports rich uses 1000;
+            if (IPAddress.TryParse(_remoteIP, out udpAddress))
             {
-                string UDPSess = "0";
-                string UDPaddress = _localIP;  //"10.1.0.97"; // my pc for now
-
-               // string UDPport =  "4444"; 
-            
-
-                byte[] startFrame = WipanCmd.UDPstart(UDPSess, UDPaddress, _udpPort);
-                byte[] stopframe = WipanCmd.UDPstop(UDPSess, UDPaddress, _udpPort);
-                if (tcpClient != null)
-                {
-                    if (tcpClient.Connected)
-                    {
-                        try
-                        {
-                            //stop 3 times to clear all UDP transmits
-                            tcpStream.Write(stopframe, 0, stopframe.Length);
-                            Thread.Sleep(100);
-                            tcpStream.Write(stopframe, 0, stopframe.Length);
-                            Thread.Sleep(100);
-                            tcpStream.Write(stopframe, 0, stopframe.Length);
-                            Thread.Sleep(100);
-                            //start udp
-                            tcpStream.Write(startFrame, 0, startFrame.Length);
-                            Debug.Write(string.Format("\nUDP Start Sent:{0:X2},{1:X2},{2:X2},{3:X2},{4:X2},{5:X2},{6:X2},{7:X2},{8:X2},{9:X2}", startFrame[0], startFrame[1], startFrame[2], startFrame[3], startFrame[4], startFrame[5], startFrame[6], startFrame[7], startFrame[8], startFrame[9]));
-                        }
-                        catch (Exception ex)
-                        {
-                            Debug.Write(ex.ToString());
-                            _errorLog.write(ex, "ethernetConnect tcpStream.Write");
-                        }
-                    }
-                    else
-                    {
-                        Debug.Write("\nnot Connected");
-                    }
-                }
-                else
-                {
-                    Debug.Write("\nnot Connected");
-                }
-
-
-
-                return true; 
+                remoteSender.Address = udpAddress;
+                remoteSender.Port = remotePort;
+                _udpCallbackRun = true;
+                _udPclient = new UdpClient(Convert.ToInt32(_udpPort));
+                UdpState state = new UdpState(_udPclient, remoteSender);
+                _udPclient.BeginReceive(new AsyncCallback(UdpDataReceived), state);  // this is blocking 
+                _errorLog.write(string.Format("udp setup done {0}:{1}", udpAddress, _udpPort));
             }
             else
             {
-                return false;
+                _errorLog.write("udp Address parse fail");
             }
+        }
 
+        /// <summary>
+        /// Sends the UDP setup messages over TCP
+        /// </summary>
+        private void SendUDPSetupMessage()
+        {
+            try
+            {
+                string UDPSess = "0";
+                string UDPaddress = _localIP;  //"10.1.0.97"; // my pc for now
+                byte[] startFrame = WipanCmd.UDPstart(UDPSess, UDPaddress, _udpPort);
+                byte[] stopframe = WipanCmd.UDPstop(UDPSess, UDPaddress, _udpPort);
+
+                //stop 3 times to clear all UDP transmits
+                _tcpStream.Write(stopframe, 0, stopframe.Length);
+                Thread.Sleep(100);
+                _tcpStream.Write(stopframe, 0, stopframe.Length);
+                Thread.Sleep(100);
+                _tcpStream.Write(stopframe, 0, stopframe.Length);
+                Thread.Sleep(100);
+                //start udp
+                _tcpStream.Write(startFrame, 0, startFrame.Length);
+                Debug.Write(string.Format("\nUDP Start Sent:{0:X2},{1:X2},{2:X2},{3:X2},{4:X2},{5:X2},{6:X2},{7:X2},{8:X2},{9:X2}", startFrame[0], startFrame[1], startFrame[2], startFrame[3], startFrame[4], startFrame[5], startFrame[6], startFrame[7], startFrame[8], startFrame[9]));
+            }
+            catch (Exception ex)
+            {
+                Debug.Write(ex.ToString());
+                _errorLog.write(ex, "ethernetConnect tcpStream.Write");
+            }
+        }
+        /// <summary>
+        /// call back for RX UDP data
+        /// </summary>
+        /// <param name="ar"></param>
+        private void UdpDataReceived(IAsyncResult ar)
+        {
+            if (_udpCallbackRun)
+            {
+                UdpClient c = (UdpClient)((UdpState)ar.AsyncState).c;
+                IPEndPoint wantedIpEndPoint = (IPEndPoint)((UdpState)(ar.AsyncState)).e;
+                IPEndPoint receivedIpEndPoint = new IPEndPoint(IPAddress.Any, 0);
+                Byte[] receiveBytes = c.EndReceive(ar, ref receivedIpEndPoint);
+                // Check sender
+                bool isRightHost = (wantedIpEndPoint.Address.Equals(receivedIpEndPoint.Address)) || wantedIpEndPoint.Address.Equals(IPAddress.Any);
+                bool isRightPort = (wantedIpEndPoint.Port == receivedIpEndPoint.Port) || wantedIpEndPoint.Port == 0;
+                if (isRightHost && isRightPort)
+                {
+                    //string receivedText = "";
+                    int lData = receiveBytes.Length;
+                    lock (_ethernetReciveQueue)
+                    {
+                        for (int i = 0; i < lData; i++)
+                        {
+                            if (lData > 1)
+                            {
+
+                                _ethernetReciveQueue.Enqueue(receiveBytes[i]);
+
+                                //if (receiveBytes[i] == 0x10)
+                                //{
+                                //    if ((i + 1) < lData)
+                                //    {
+                                //        if (receiveBytes[i + 1] == 0x02)
+                                //        {
+                                //            receivedText += "\n";
+                                //        }
+                                //    }
+                                //    else
+                                //    {
+                                //    }
+                                //}
+                            }
+                            //receivedText += string.Format("{0:X2}", receiveBytes[i]);
+                        }
+                        //Debug.Write(receivedText);
+                    }
+                    tidFormFrameWaitHandle.Set();
+                }
+                c.BeginReceive(new AsyncCallback(UdpDataReceived), ar.AsyncState); // Restart listening for udp data packages
+            }
+            else
+            {
+                _udPclient.Close();
+            }
+        }
+
+        /// <summary>
+        /// takes bytes from _ethernetReciveQueue and makes them into frames
+        /// </summary>
+        private void formFrameThread()
+        {
+            while (!_shouldStopMain)
+            {
+                // System.Threading.Thread.Sleep(1);
+                // int com_byte = comSetup1.get_comms();  //for comport connection
+                tidFormFrameWaitHandle.WaitOne(); // blocks thread untill signall is recived 
+                int queueCount = _ethernetReciveQueue.Count;
+                bool Do_Work = true;
+                if (_tcpClient.Connected)  // if ethernet is Rx is running
+                {
+                    while (queueCount != 0)
+                    {
+                        byte com_byte;
+                        lock (_ethernetReciveQueue)
+                        {
+                            com_byte = _ethernetReciveQueue.Dequeue();
+                        }
+                        Do_Work = processRawData(Do_Work, com_byte);
+                        queueCount--;
+                    }
+
+                }
+            }
         }
 
         private void extractDataThread()
@@ -243,10 +317,6 @@ namespace WpfApplication1
                 {
                     if (_allLists.workingTagQueue0.Count > 0)
                     {
-                        //for (int i = 0; i < allListsRef.workingTagQueue.Count; i++)
-                        //{
-                        //    ThreadPool.QueueUserWorkItem(ThreadPoolCallback, i);
-                        //}
                         Tag temp = _allLists.workingTagQueue0.Dequeue();
                         if (temp != null)
                         {
@@ -264,7 +334,7 @@ namespace WpfApplication1
             while (!_shouldStopListen)//(ethernetPort.bActive)
             {
 
-                if (this.tcpClient.Connected)
+                if (this._tcpClient.Connected)
                 {
                     //try - so we can see if the connection has been dropped or is half open
                     //in the send thread if we occasionaly send empty packets then this will check the stream state.
@@ -274,7 +344,7 @@ namespace WpfApplication1
                     try
                     {
                       //  this.myStream.ReadTimeout = 1000;
-                        myByte = this.tcpStream.ReadByte();
+                        myByte = this._tcpStream.ReadByte();
                     }
                     catch (Exception e)
                     {
@@ -283,7 +353,7 @@ namespace WpfApplication1
                         _errorLog.write(e, "EthernetConnection TCPconnectionLoss");
                     }
 
-                    lock (ethernetReciveQueue)
+                    lock (_ethernetReciveQueue)
                     {
                        // ethernetReciveQueue.Enqueue(myByte);  // *********************  removed for DEBUG ****************************************************************
                     }
@@ -320,25 +390,37 @@ namespace WpfApplication1
             _ethernetSendWaitHandle.Set();
         }
 
+        public void TCPSend(int[] items)
+        {
+            lock (_ethernetTransmitQueue)
+            {
+                foreach (int item in items)
+                {
+                    _ethernetTransmitQueue.Enqueue(item);
+                }
+            }
+            _ethernetSendWaitHandle.Set();
+        }
+
         private void TCPSendThread()
         {
 
             while (!_shouldStopSend)
             {
-                while (this.tcpClient.Connected)   //(ethernetPort.bActive)
+                while (this._tcpClient.Connected)   //(ethernetPort.bActive)
                 {
                     _ethernetSendWaitHandle.WaitOne(); // blocks thread untill signall is recived 
                     
-                    int queueTempLength = ethernetTransmitQueue.Count;
-                    while (ethernetTransmitQueue.Count != 0)
+                    int queueTempLength = _ethernetTransmitQueue.Count;
+                    while (_ethernetTransmitQueue.Count != 0)
                     {
                         
                         // ethernetPort.myStream.WriteByte( (byte)(ethernetTransmitQueue.Dequeue()) );
 
                         //Works with breakpoint here probably becaus it gives it time for the queue to fill up
-                        lock (ethernetTransmitQueue)
+                        lock (_ethernetTransmitQueue)
                         {
-                            this.TCPtxBuffer[this.txBufferPosition] = (byte)(ethernetTransmitQueue.Dequeue());
+                            this._TCPtxBuffer[this._txBufferPosition] = (byte)(_ethernetTransmitQueue.Dequeue());
                         }
 
                         //for (int delay = 0; delay < 99999; delay++) //this delay is a frig
@@ -346,19 +428,19 @@ namespace WpfApplication1
 
                         //}
 
-                        if (this.TCPtxBuffer[this.txBufferPosition] == 0)
+                        if (this._TCPtxBuffer[this._txBufferPosition] == 0)
                         {
                         }
 
-                        this.txBufferPosition++;
+                        this._txBufferPosition++;
 
-                        if (this.TCPtxBuffer[(this.txBufferPosition - 1)] == 0) // this was when I was looking for a null before sending
+                        if (this._TCPtxBuffer[(this._txBufferPosition - 1)] == 0) // this was when I was looking for a null before sending
                        // if (this.txBufferPosition == queueTempLength) // now I am using the lengh of the queue, this could be a problem if there is 2 messages in the queue
                         {
 
                             try
                             {
-                                this.tcpStream.Write(this.TCPtxBuffer, 0, this.TCPtxBuffer[2] + 3);
+                                this._tcpStream.Write(this._TCPtxBuffer, 0, this._TCPtxBuffer[2] + 3);
                                 
                             }
                             catch (SocketException e)
@@ -367,7 +449,7 @@ namespace WpfApplication1
                             }
 
 
-                            int txSequ = this.TCPtxBuffer[5];
+                            int txSequ = this._TCPtxBuffer[5];
 
                             //if (ackBack(txSequ) == false)
                             //{
@@ -382,15 +464,15 @@ namespace WpfApplication1
 
                             //    }
                             //}
-                            this.txBufferPosition = 0;
+                            this._txBufferPosition = 0;
 
                             // clear down txbuffer
 
-                            int length = this.TCPtxBuffer[3] + 3;
+                            int length = this._TCPtxBuffer[3] + 3;
 
                             for (int j = 0; j <= length; j++)
                             {
-                                this.TCPtxBuffer[j] = 0;
+                                this._TCPtxBuffer[j] = 0;
                             }
 
                         }
@@ -401,7 +483,7 @@ namespace WpfApplication1
                     try
                     {
                         byte[] keepAlive = new byte[1] { 0x0 }; 
-                        this.tcpStream.Write(keepAlive, 0, 1); //length of one and value of 0x0 sent to check that connection is still up if not = exeption.NOTE A length of 0 dose not rase the exeption! 
+                        this._tcpStream.Write(keepAlive, 0, 1); //length of one and value of 0x0 sent to check that connection is still up if not = exeption.NOTE A length of 0 dose not rase the exeption! 
                         
                         // ethernetPort.myStream.Write(ethernetPort.txBuffer, 0, ethernetPort.txBuffer[3] + 3);
                     }
@@ -435,226 +517,141 @@ namespace WpfApplication1
 
 
 
-        private void mainThread1()
+        private bool processRawData(bool Do_Work, byte com_byte)
         {
-            while (!_shouldStopMain)
+            if (_InFrameFlag == 0)
             {
-               // System.Threading.Thread.Sleep(1);
-                // int com_byte = comSetup1.get_comms();  //for comport connection
-
-                bool Do_Work = true;
-
-            
-                    if (tcpClient.Connected)  // if ethernet is Rx is running
-                    {
-                        // mainThreadWaitHandle.WaitOne();
-
-                        if (ethernetReciveQueue.Count != 0)
-                        {
-                            int com_byte;
-
-                            lock (ethernetReciveQueue)
-                            {
-                                com_byte = ethernetReciveQueue.Dequeue();
-                            }
-
-
-
-                            //richTextBox1.Invoke(new EventHandler(delegate
-                            //        {
-
-                            //            richTextBox1.Text += string.Format("{0:x}", com_byte.ToString("x2"));
-                            //            List<Reader> searchResultR = myReaderList.FindAll(Rtest => Rtest.ReaderAdd != "");
-
-                            //        }));
-
-
-
-                            Do_Work = processRawData(Do_Work, com_byte); 
-                        }
-                    }
-
-            }
-
-        }
-        private bool processRawData(bool Do_Work, int com_byte)
-        {
-            uint ckSumCalc;
-            const int checkSumLength = 4;
-            const int dleStxLength = 2;
-            int queueToggle = 0;
-
-            if (com_byte == -1)
-            {
-                // reached end of buffer
-                //So we can stop the background worker for now start again on buffer RX
-                //backgroundWorker1.CancelAsync();  //not supported
-                Do_Work = false;
-            }
-            if (com_byte == -2)
-            {
-                Do_Work = false;
-            }
-            else
-            //if (com_byte != -1)
-            {
-                if (queueToggle == 0)
-                { queueToggle = 1; }
-                else
-                { queueToggle = 0; }
-
-
-                if (InFrameFlag == 0)
+                if (DleStxCheck(com_byte))
                 {
-                    if (com_byte == DLE)                      //Possible SoF
-                    {
-                        AAflag = 1;
-                    }
-
-                    if (AAflag == 1 & com_byte == STX)          //SoF Indication
-                    {
-                        PortArrayCount = 1;
-                        AAflag = 0;
-                        InFrameFlag = 1;
-                    }
-                    if (AAflag == 1 & com_byte == DLE)
-                    {
-                        InFrameFlag = 0;                        //Keep hunting for SoF this is a stuffed byte DLE DLE
-                        PortArrayCount = 0;
-                    }
-
+                    _PortArrayCount = 1;
+                    _InFrameFlag = 1;
                 }
-                if (InFrameFlag == 1)
+            }
+            if (_InFrameFlag == 1) //Put bytes into array
+            {
+                fillPortArray(com_byte);
+
+                if ((_PortArrayCount == _PktLengthInt) & (_PortArrayCount > 3))                                             //Pull stuff out of array
                 {
-                    
-
-
-
-                    //Put bytes into array
-
-                    PortArray[PortArrayCount] = com_byte;
-
-
-
-                    if (PortArrayCount == 2)                                                         //Pull out packet length once we have it
+                    uint stripCount = DleStrip();
+                    const int checkSumLength = 4;
+                    const int dleStxLength = 2;
+                    uint ckSumCalc = calcAdler32(3, (uint)_PktLengthInt - checkSumLength - dleStxLength - stripCount);  //Minus checksum from length 
+                    lock (_PortArray)
                     {
-                        // PktLengthInt = ((PortArray[2] << 8) + PortArray[1]) + 7;                   
-                        PktLengthInt = PortArray[2] + 2;   //Add 2 because my length includes DLE and STX bytes but DLE byte is always 0 not x10
+                        _WorkingTag.UpdateTag(_PortArray, ckSumCalc);
                     }
-
-
-                    if (PktLengthInt > PortArrayMax - 1) //ERROR THE LENGTH IS WAY TO BIG!!!
+                    if (_WorkingTag.CheckSum == _WorkingTag.calculatedCheckSum)
                     {
-                        InFrameFlag = 0;
-                        PortArrayCount = 0;
-                        PktLengthInt = 0;
+                        _allLists.workingTagQueue0.Enqueue(_WorkingTag);
+                        tidExtractDataWaitHandle.Set();
 
-                        for (int i = 0; i < PortArrayMax; i++)
+                        if (_WorkingTag.BrCmd > 0)
                         {
-                            PortArray[i] = 1;                          //Clear Down Array
+
+                            //    messageWindow1.rxMessageWaitHandle.Set();
+
+                            //    lock (messageWindow1.rxMessageQueue)
+                            //    {
+                            //        messageWindow1.rxMessageQueue.Enqueue(WorkingTag);
+                            //        Tag debug = messageWindow1.rxMessageQueue.Peek();
+                            //        if (debug.BrCmd == 0)
+                            //        {
+                            //        }
+
+                            //    }
+
+                            //    //need to create an event
+                            //    //messageWindow1.textRxMessage.Text = "hello";
+
                         }
-                    }
 
-
-                    if ((PortArrayCount == PktLengthInt) & (PortArrayCount > 3))                                             //Pull stuff out of array
-                    {
-
-
-
-
-                        // InFrameFlag = 0;
-
-                        // AAStrip();                                                                  //Remove AA Padding
-                        uint stripCount = DleStrip();
-
-                        ckSumCalc = calcAdler32(3, (uint)PktLengthInt - checkSumLength - dleStxLength - stripCount);  //Minus checksum from length 
-
-                        lock (PortArray)
+                        if (_WorkingTag.PktType != "0")
                         {
-                            WorkingTag.UpdateTag(PortArray, ckSumCalc);
                         }
-                            
 
-                        // so now we are goint to put this in a tag queue so we can have a tread pool to handle lots of data
-                        //now lets toggle between two queues so we can use two threads to service
-
-
-                        if (WorkingTag.CheckSum == WorkingTag.calculatedCheckSum)
+                        if (_WorkingTag.ReaderAdd == "0000000000000000") // router has joined the network
                         {
-                            _allLists.workingTagQueue0.Enqueue(WorkingTag);
-                            tidExtractDataWaitHandle.Set();
 
-                            if (WorkingTag.BrCmd > 0)
+                            if (_WorkingTag.PktEvent == 0x8000) // Left Network
                             {
-
-                                //    messageWindow1.rxMessageWaitHandle.Set();
-
-                                //    lock (messageWindow1.rxMessageQueue)
-                                //    {
-                                //        messageWindow1.rxMessageQueue.Enqueue(WorkingTag);
-                                //        Tag debug = messageWindow1.rxMessageQueue.Peek();
-                                //        if (debug.BrCmd == 0)
-                                //        {
-                                //        }
-
-                                //    }
-
-                                //    //need to create an event
-                                //    //messageWindow1.textRxMessage.Text = "hello";
+                                _WorkingTag.BrCmd = 0xEF;     //these BrCmds I have made up just to send messages in this app
+                            }
+                            if (_WorkingTag.PktEvent == 0x4000) // Joined Network
+                            {
+                                _WorkingTag.BrCmd = 0xf0;    //these BrCmds I have made up just to send messages in this app
+                            }
+                            lock (_allLists.rxMessageQueue)
+                            {
+                                _allLists.rxMessageQueue.Enqueue(_WorkingTag);
 
                             }
-
-                            if (WorkingTag.PktType != "0")
-                            {
-                            }
-
-                            if (WorkingTag.ReaderAdd == "0000000000000000") // router has joined the network
-                            {
-
-                                if (WorkingTag.PktEvent == 0x8000) // Left Network
-                                {
-                                    WorkingTag.BrCmd = 0xEF;     //these BrCmds I have made up just to send messages in this app
-                                }
-                                if (WorkingTag.PktEvent == 0x4000) // Joined Network
-                                {
-                                    WorkingTag.BrCmd = 0xf0;    //these BrCmds I have made up just to send messages in this app
-                                }
-                                lock (_allLists.rxMessageQueue)
-                                {
-                                    _allLists.rxMessageQueue.Enqueue(WorkingTag);
-
-                                }
-                                _messageWindow1.rxMessageWaitHandle.Set();
-                            }
+                            _messageWindow1.rxMessageWaitHandle.Set();
                         }
-                        else
-                        {
-                            checkSumFails++;
-                            Debug.WriteLine("checksum fail count = {0}", checkSumFails);
-                        }
-
-                        InFrameFlag = 0;
-                        PortArrayCount = 0;
-
-                        for (int i = 0; i < PortArrayMax; i++)
-                        {
-                            PortArray[i] = 0;                          //Clear Down Array
-                        }
-                    }
-
-                    if (PortArrayCount < PortArrayMax - 1)
-                    {
-                        PortArrayCount++;
                     }
                     else
-                    { //PortArrayCount Error
-                        InFrameFlag = 0;
-                        PortArrayCount = 0;
+                    {
+                        _checkSumFails++;
+                        Debug.WriteLine("checksum fail count = {0}", _checkSumFails);
                     }
 
+                    _InFrameFlag = 0;
+                    _PortArrayCount = 0;
+
+                    for (int i = 0; i < _PortArrayMax; i++)
+                    {
+                        _PortArray[i] = 0;                          //Clear Down Array
+                    }
+                }
+
+                if (_PortArrayCount < _PortArrayMax - 1)
+                {
+                    _PortArrayCount++;
+                }
+                else
+                { //PortArrayCount Error
+                    _InFrameFlag = 0;
+                    _PortArrayCount = 0;
+                }
+
+            }
+
+            return Do_Work;
+        }
+
+        private void fillPortArray(byte com_byte)
+        {
+            _PortArray[_PortArrayCount] = com_byte;
+            if (_PortArrayCount == 2)                                                         //Pull out packet length once we have it
+            {
+                _PktLengthInt = _PortArray[2] + 2;   //Add 2 because my length includes DLE and STX bytes but DLE byte is always 0 not x10
+            }
+            if (_PktLengthInt > _PortArrayMax - 1)   //ERROR THE LENGTH IS WAY TO BIG!!!
+            {
+                _InFrameFlag = 0;
+                _PortArrayCount = 0;
+                _PktLengthInt = 0;
+                for (int i = 0; i < _PortArrayMax; i++)
+                {
+                    _PortArray[i] = 1;                          //Clear Down Array
                 }
             }
-            return Do_Work;
+        }
+
+        private bool DleStxCheck(byte com_byte)
+        {
+            if (com_byte == DLE)                      //Possible SoF
+            {
+                _DLEflag = 1;
+                return false;
+            }
+
+            if (_DLEflag == 1 & com_byte == STX)          //SoF Indication
+            {
+                _DLEflag = 0;
+                return true;
+            }
+            return false;
         }
         private void ExtractData(Tag tag)
         {
@@ -687,7 +684,7 @@ namespace WpfApplication1
                 if (_DBsetup.trackingEnabled)
                 {
 
-                    dbConnect.trackingDBaseUpDate(tag);          //Adds new tag to DB OR updates tags
+                    _dbConnect.trackingDBaseUpDate(tag);          //Adds new tag to DB OR updates tags
 
 
                 }
@@ -827,7 +824,7 @@ namespace WpfApplication1
         {
             if (Properties.Settings.Default.EnableTracking)
             {
-                dbConnect = new DBConnect(Properties.Settings.Default.Server,
+                _dbConnect = new DBConnect(Properties.Settings.Default.Server,
                                             Properties.Settings.Default.Port,
                                             Properties.Settings.Default.Database,
                                             Properties.Settings.Default.UID,
@@ -841,16 +838,16 @@ namespace WpfApplication1
             uint count = 0;
 
 
-            for (int i = 1; i <= (PortArrayCount - 1); i++)
+            for (int i = 1; i <= (_PortArrayCount - 1); i++)
             {
-                if (PortArray[i] == DLE)
+                if (_PortArray[i] == DLE)
                 {
-                    if (PortArray[i - 1] == DLE)   //so double DLE
+                    if (_PortArray[i - 1] == DLE)   //so double DLE
                     {
                         // shift array left form this point
-                        for (int j = i; j <= PortArrayCount - 1; j++)
+                        for (int j = i; j <= _PortArrayCount - 1; j++)
                         {
-                            PortArray[j] = PortArray[j + 1];
+                            _PortArray[j] = _PortArray[j + 1];
                             
                         }
                     count++;
@@ -874,7 +871,7 @@ namespace WpfApplication1
                 /* Process each byte of the data in order */
                 for (index = startPoint; index < (startPoint + length); ++index)
                 {
-                    a = (a + (uint)PortArray[index]) % MOD_ADLER;
+                    a = (a + (uint)_PortArray[index]) % MOD_ADLER;
                     b = (b + a) % MOD_ADLER;
                 }
 
@@ -897,14 +894,49 @@ namespace WpfApplication1
             }
             this._shouldStopListen = true;
             this._shouldStopSend = true;
-            udpCallbackRun = false;
-            udPclient.Close();
+            _udpCallbackRun = false;
+            _udPclient.Close();
             
            // this.tidListen.Abort();
            // this.tidSend.Abort();
 
 
         }
+
+        public void TCPAbort()
+        {
+
+            try
+            {
+                _udpCallbackRun = false;
+                _udPclient.Close();
+            }
+            catch { }
+            
+            try
+                {
+                    _TCPListenThread.Abort();
+                }
+                catch{}
+                try
+                {
+                    _TCPSendThread.Abort();
+                }
+                catch{}
+                try
+                {
+                    _tidExtractData.Abort();
+                }
+                catch{}
+                this._shouldStopMain = true;
+                try
+                {
+                    _tcpClient.Close();
+                }
+                catch { }
+  
+        }
+        
         public void RequestListenStop()
         {
             this._shouldStopListen = true;
@@ -919,61 +951,7 @@ namespace WpfApplication1
             this._shouldStopMain = true;
         }
 
-        private void DataReceived(IAsyncResult ar)
-        {
-            if (udpCallbackRun)
-            {
-                UdpClient c = (UdpClient)((UdpState)ar.AsyncState).c;
-                IPEndPoint wantedIpEndPoint = (IPEndPoint)((UdpState)(ar.AsyncState)).e;
-                IPEndPoint receivedIpEndPoint = new IPEndPoint(IPAddress.Any, 0);
-                Byte[] receiveBytes = c.EndReceive(ar, ref receivedIpEndPoint);
 
-
-                // Check sender
-                bool isRightHost = (wantedIpEndPoint.Address.Equals(receivedIpEndPoint.Address)) || wantedIpEndPoint.Address.Equals(IPAddress.Any);
-             //   bool isRightPort = (wantedIpEndPoint.Port == receivedIpEndPoint.Port) || wantedIpEndPoint.Port == 0;
-                if (isRightHost)// && isRightPort)
-                {
-                    string receivedText = "";
-                    int lData = receiveBytes.Length;
-                    for (int i = 0; i < lData; i++)
-                    {//int rxByte = Convert.ToInt32(receiveBytes[i]);
-                        if (lData > 1)
-                        {
-                            lock (ethernetReciveQueue)
-                            {
-                                ethernetReciveQueue.Enqueue(receiveBytes[i]);
-                            }
-                            if (receiveBytes[i] == 0x10)
-                            {
-                                if ((i + 1) < lData)
-                                {
-                                    if (receiveBytes[i + 1] == 0x02)
-                                    {
-                                        receivedText += "\n";
-                                    }
-                                }
-                                else
-                                {
-                                }
-                            }
-                        }
-                        receivedText += string.Format("{0:X2}", receiveBytes[i]);
-
-                    }
-
-                    Debug.Write(receivedText);
-                }
-
-                // Restart listening for udp data packages
-                c.BeginReceive(new AsyncCallback(DataReceived), ar.AsyncState);
-
-            }
-            else
-            {
-                udPclient.Close();
-            }
-        }
 
        
     }

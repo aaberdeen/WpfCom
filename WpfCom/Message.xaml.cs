@@ -365,7 +365,7 @@ namespace WpfApplication1
         class RxMessageBind : INotifyPropertyChanged
         {
 
-
+            private DateTime _timestamp;
             private string _message;
             private int _PktSequence;
             private int _PktEvent;
@@ -374,6 +374,7 @@ namespace WpfApplication1
             private int _BrCmd;
             private string _TagAdd;
             private CheckBox _Del;
+            
             
 
 
@@ -414,13 +415,23 @@ namespace WpfApplication1
                 //}
             }
 
+
+
+            public DateTime timeStamp
+            {
+                get { return DateTime.Now; }
+                set { }
+            }
+            
             public string message
             {
                 get { return _message; }
                 set
                 {
                     _message = value;
+                    _timestamp = DateTime.Now;
                     this.NotifyPropertyChanged("message");
+                    this.NotifyPropertyChanged("timeStamp");
                 }
             }
 

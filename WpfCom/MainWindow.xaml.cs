@@ -199,65 +199,10 @@ namespace WpfApplication1
                 catch
                 {
                 }
+                ethCon.Value.TCPAbort();
 
-                //if (ethCon.Value.tidListen != null)
-                //{
-                //    ethCon.Value.tidListen.Abort();
-                //}
-                //if (ethCon.Value.tidSend != null)
-                //{
-                //    ethCon.Value.tidSend.Abort();
-                //}
-
-                try
-                {
-                    ethCon.Value._TCPListenThread.Abort();
-                }
-                catch
-                {
-                }
-                try
-                {
-                    ethCon.Value._TCPSendThread.Abort();
-                }
-                catch
-                {
-                }
-                try
-                {
-                    ethCon.Value.tidExtractData.Abort();
-                }
-                catch
-                {
-                }
-
-
-                ethCon.Value.RequestSendMain();
             }
-            //mainThread.Abort();
             messageWindow1.Do_Work = false;
-
-
-            Thread.Sleep(1000);
-
-            foreach (KeyValuePair<string, EthernetConnection> ethCon in myEthConnList)
-            {
-                //if (ethCon.Value.myClient != null)
-                //{
-                //    ethCon.Value.myClient.Close();
-                //}
-
-                try
-                {
-                    ethCon.Value.tcpClient.Close();
-                    
-                    ethCon.Value.udpCallbackRun = false;
-                    ethCon.Value.udPclient.Close();
-                }
-                catch
-                {
-                }
-            }
             messageWindow1.shouldStopSendMessageThread = true;
             messageWindow1.sendMessageWaitHandle.Set(); //kick this so the task can end
           
@@ -431,32 +376,7 @@ namespace WpfApplication1
             ethernetConnectWaitHandle.Reset();
             foreach (KeyValuePair<string, EthernetConnection> ethCon in myEthConnList)
             {
-               
-                try
-                {
-                    ethCon.Value._TCPListenThread.Abort();
-                }
-                catch{}
-                try
-                {
-                    ethCon.Value._TCPSendThread.Abort();
-                }
-                catch
-                {
-                }
-                ethCon.Value.RequestSendMain();
-
-                try
-                {
-                    ethCon.Value.tcpClient.Close();
-                    
-                    ethCon.Value.udpCallbackRun = false;
-                    ethCon.Value.udPclient.Close();
-                }
-                catch
-                {
-                }
-
+                ethCon.Value.TCPAbort();                    
             }
 
             if (comSetup1.comport.IsOpen) comSetup1.comport.Close();
@@ -466,30 +386,7 @@ namespace WpfApplication1
             timerTree.Stop();
             foreach (KeyValuePair<string, EthernetConnection> ethCon in myEthConnList)
             {
-
-                try
-                {
-                    /* Stop listening thread */
-                    ethCon.Value._TCPListenThread.Abort();
-                }
-                catch{}
-
-                try
-                {
-                    /* Stop sending thread */
-                    ethCon.Value._TCPSendThread.Abort();
-                }
-                catch{}
-                try
-                {
-                    ethCon.Value.tidExtractData.Abort();
-                }
-                catch
-                {
-                }
-
-                //  mainThread.Abort();
-               
+                ethCon.Value.TCPAbort();     
             }
             myEthConnList.Clear();
             allLists.workingTagQueue0.Clear();
@@ -516,24 +413,17 @@ namespace WpfApplication1
         {
             foreach (KeyValuePair<string, EthernetConnection> ethCon in myEthConnList)
             {
-                lock (ethCon.Value.ethernetTransmitQueue) //  myEthConnList[0].ethernetTransmitQueue)
+                int[] frame = new int[3 + message.Length];
+                int i = 0;
+                frame[i++] = tcpMessageType.TAG_CONFIG;
+                frame[i++] = tcpMessageType.TAG_BROADCAST_PACKET;
+                // ethernetTransmitQueue.Enqueue(tcpSequ);
+                frame[i++] = message.Length;
+                for (int j = 0; j < message.Length; j++)
                 {
-                    ethCon.Value.ethernetTransmitQueue.Enqueue(tcpMessageType.TAG_CONFIG);
-                    ethCon.Value.ethernetTransmitQueue.Enqueue(tcpMessageType.TAG_BROADCAST_PACKET);
-                    // ethernetTransmitQueue.Enqueue(tcpSequ);
-                    ethCon.Value.ethernetTransmitQueue.Enqueue(message.Length);
-                                       
-                    for (int i = 0; i < message.Length; i++)
-                    {
-                        ethCon.Value.ethernetTransmitQueue.Enqueue(Convert.ToInt32(message[i]));
-                                              
-                        if (Convert.ToInt32(message[i]) == 0)
-                        {
-                        }
-
-                    }
+                    frame[i++] = (Convert.ToInt32(message[j]));
                 }
-                ethCon.Value.TCPSend();
+                ethCon.Value.TCPSend(frame);
             }
         }
 
