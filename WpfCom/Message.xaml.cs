@@ -118,9 +118,6 @@ namespace WpfApplication1
                     lock (_allLists.rxMessageQueue)
                     {
                         message = _allLists.rxMessageQueue.Dequeue();
-                        if (message.BrCmd == 0)
-                        {
-                        }
                         TagMessageEvent(message);
                     }
                 }
@@ -500,6 +497,8 @@ namespace WpfApplication1
                 
                     switch (BrCmd)
                     {
+                        case 0:
+                            return "BCmd 0";
                         case 1:
                             return "Ack";
                             

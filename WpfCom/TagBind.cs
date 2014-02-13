@@ -165,8 +165,6 @@ namespace WpfApplication1
                 }
             }
         }
-
-
         public string ReaderAdd
         {
             get { return _ReaderAdd; }
@@ -180,7 +178,6 @@ namespace WpfApplication1
 
             }
         }
-
         public string TagAdd
         {
             get { return _TagAdd; }
@@ -242,7 +239,6 @@ namespace WpfApplication1
                 }
             }
         }
-
         public float Volt
         {
             get
@@ -251,7 +247,6 @@ namespace WpfApplication1
                 return toReturn/1000;
             }
         }
-
         public int BrSequ
         {
             get { return _BrSequ; }
@@ -384,8 +379,6 @@ namespace WpfApplication1
                 }
             }
         }
-
-
         public int RxLQI
         {
             get { return _RxLQI; }
@@ -398,7 +391,6 @@ namespace WpfApplication1
                 }
             }
         }
-
         public float CH4gas
         {
             get { return _CH4gas; }
@@ -529,8 +521,11 @@ namespace WpfApplication1
             {
                 if (_u58 != value)
                 {
+                    if ((this.zoneID == "ff") || (this.zoneID == "FF"))
+                    {
+                        _errorLog.write(string.Format("DEBUG _u58 ={0}, new value = {1}", _u58, value));
+                    }
                     _u58 = value;
-
                     this.NotifyPropertyChanged("u58");
                     this.NotifyPropertyChanged("dcVoltsState");
                     this.NotifyPropertyChanged("switchState");
@@ -545,8 +540,6 @@ namespace WpfApplication1
         public string switchState
         {
             //get { return string.Format("{0:b}", _u58); } // _u61; }
-
-
 
             get
             {
@@ -581,7 +574,6 @@ namespace WpfApplication1
             }
 
         }
-
         public string Image
         {
 
@@ -591,62 +583,64 @@ namespace WpfApplication1
                 string text = "";
                 if (this._endPointType == "Key")
                 {
-                    uint u58 = _u58 >> 1;
+                    if (this._ReaderAdd != "0000000000000000")
+                    {
+                        uint u58 = _u58 >> 1;
 
-                    if (u58 == 0)
-                    {
+                        if (u58 == 0)
+                        {
 
-                        text = "key_good.png";
-                        _errorLog.write(string.Format("Key Good, Zone= {0}, Unit= {1}", this.zoneID, this.unitID));
-                    }
+                            text = "key_good.png";
+                            _errorLog.write(string.Format("Key Good, Zone= {0}, Unit= {1}", this.zoneID, this.unitID));
+                        }
 
-                    if (u58 == 1)
-                    {
-                        text = "key_LH.png";
-                        _errorLog.write(string.Format("Key Slack Left, Zone= {0}, Unit= {1}", this.zoneID, this.unitID));
-                    }
-                    if (u58 == 2)
-                    {
-                        text = "key_LO.png";
-                        _errorLog.write(string.Format("Key Lock Out, Zone= {0}, Unit= {1}", this.zoneID, this.unitID));
-                    }
-                    if (u58 == 3)
-                    {
-                        text = "key_LO_LH.png";
-                        _errorLog.write(string.Format("Key Lock Out, Slack Left, Zone= {0}, Unit= {1}", this.zoneID, this.unitID));
-                    }
-                    if (u58 == 4)
-                    {
-                        text = "key_RH.png";
-                        _errorLog.write(string.Format("Key Slack Right, Zone= {0}, Unit= {1}", this.zoneID, this.unitID));
-                    }
+                        if (u58 == 1)
+                        {
+                            text = "key_LH.png";
+                            _errorLog.write(string.Format("Key Slack Left, Zone= {0}, Unit= {1}", this.zoneID, this.unitID));
+                        }
+                        if (u58 == 2)
+                        {
+                            text = "key_LO.png";
+                            _errorLog.write(string.Format("Key Lock Out, Zone= {0}, Unit= {1}", this.zoneID, this.unitID));
+                        }
+                        if (u58 == 3)
+                        {
+                            text = "key_LO_LH.png";
+                            _errorLog.write(string.Format("Key Lock Out, Slack Left, Zone= {0}, Unit= {1}", this.zoneID, this.unitID));
+                        }
+                        if (u58 == 4)
+                        {
+                            text = "key_RH.png";
+                            _errorLog.write(string.Format("Key Slack Right, Zone= {0}, Unit= {1}", this.zoneID, this.unitID));
+                        }
 
-                    if (u58 == 5)
-                    {
-                        text = "key_LH_RH.png";
-                        _errorLog.write(string.Format("Key Slack Left, Slack Right, Zone= {0}, Unit= {1}", this.zoneID, this.unitID));
-                    }
-                    if (u58 == 6)
-                    {
-                        text = "key_LO_RH.png";
-                        _errorLog.write(string.Format("Key Lock Out, Slack Right, Zone= {0}, Unit= {1}", this.zoneID, this.unitID));
+                        if (u58 == 5)
+                        {
+                            text = "key_LH_RH.png";
+                            _errorLog.write(string.Format("Key Slack Left, Slack Right, Zone= {0}, Unit= {1}", this.zoneID, this.unitID));
+                        }
+                        if (u58 == 6)
+                        {
+                            text = "key_LO_RH.png";
+                            _errorLog.write(string.Format("Key Lock Out, Slack Right, Zone= {0}, Unit= {1}", this.zoneID, this.unitID));
 
-                    }
-                    if (u58 == 7)
-                    {
-                        text = "key_LO_LH_RH.png";
-                        _errorLog.write(string.Format("Key Lock Out, Slack Left, Slack Right, Zone= {0}, Unit= {1}", this.zoneID, this.unitID));
+                        }
+                        if (u58 == 7)
+                        {
+                            text = "key_LO_LH_RH.png";
+                            _errorLog.write(string.Format("Key Lock Out, Slack Left, Slack Right, Zone= {0}, Unit= {1}", this.zoneID, this.unitID));
+                        }
                     }
                 }
                     return text;
-
+                
                     // return Convert.ToString(_u58, 2).PadLeft(8, '0'); 
                 
          
             }
 
         }
-
         public bool remoteLockout
         {
             get
@@ -670,9 +664,6 @@ namespace WpfApplication1
          
          
         }
-
-
-
         public bool keyShort
         {
             get
@@ -709,8 +700,6 @@ namespace WpfApplication1
                 }
             }
         }
-
-
         public bool switchError
         {    
             get
@@ -776,8 +765,7 @@ namespace WpfApplication1
             public static byte LOCK_OUT = 0x04;
             public static byte RH_SLACK = 0x02;
             public static byte LO_FET_Gate = 0x01;
-        }
-        
+        }       
         public bool RLO_Error
         {
             get
@@ -825,7 +813,6 @@ namespace WpfApplication1
             }
 
         }
-        
         public uint u59
         {
             // get { return _u59; }
@@ -833,6 +820,10 @@ namespace WpfApplication1
             {
                 if (_u59 != value)
                 {
+                    if ((this.zoneID == "ff") || (this.zoneID == "FF"))
+                    {
+                        _errorLog.write(string.Format("DEBUG _u59 ={0}, new value = {1}", _u59, value));
+                    }
                     _u59 = value;
                     this.NotifyPropertyChanged("u59");
                     this.NotifyPropertyChanged("dcVoltsState");

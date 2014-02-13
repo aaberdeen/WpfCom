@@ -36,7 +36,7 @@ namespace WpfApplication1
         private byte[] _TCPrxBuffer;
         private byte[] _TCPtxBuffer;
         private int _txBufferPosition;
-        private byte _InFrameFlag = 0;
+        private bool _InFrame = false;
         private byte _DLEflag = 0;
         private int _PortArrayCount = 0;
         private int[] _PortArray = new int[200];
@@ -46,7 +46,7 @@ namespace WpfApplication1
         private int _PktLengthInt = 0;
         private Tag _WorkingTag = new Tag();
        // DBConnect dbConnectRef;
-        private Lists _allLists;
+        //private Lists _allLists;
         private Thread _formFrameThread;
         private AutoResetEvent tidFormFrameWaitHandle = new AutoResetEvent(false);
         private int _index;
@@ -63,15 +63,19 @@ namespace WpfApplication1
         private string _TCPport;
         private string _localIP;
         private string _udpPort;
-       
+        const int checkSumLength = 4;
+        const int dleStxLength = 2;
 
-        public EthernetConnection(string remoteIP, string TCPport, string localIP, string udpPort, ref ComSetup com, ref MinersNamesForm MNform, ref DataBaseSetup DBsetup, bool DBcon, ref Lists allLists, int index, ref Message messageWindow1)
+        public static Lists allLists = new Lists();
+
+        //public EthernetConnection(string remoteIP, string TCPport, string localIP, string udpPort, ref ComSetup com, ref MinersNamesForm MNform, ref DataBaseSetup DBsetup, bool DBcon, ref Lists allLists, int index, ref Message messageWindow1)
+        public EthernetConnection(string remoteIP, string TCPport, string localIP, string udpPort, ref ComSetup com, ref MinersNamesForm MNform, ref DataBaseSetup DBsetup, bool DBcon, int index, ref Message messageWindow1)
         {
             _com = com;
             _MNform = MNform;
             _DBsetup = DBsetup;
            // dbConnectRef = DBcon;
-            _allLists = allLists;
+            //_allLists = allLists;                         // remove after tesing
             _index = index;
             _messageWindow1 = messageWindow1;
             _localIP = localIP;
@@ -159,7 +163,7 @@ namespace WpfApplication1
             _tidExtractData.IsBackground = true;
             // tidExtractData1 = new Thread(new ThreadStart(extractDataThread1));
             /*main thread*/
-            _formFrameThread = new Thread(new ThreadStart(formFrameThread));
+            _formFrameThread = new Thread(new ThreadStart(makeFrameThread));
             _formFrameThread.Name = "formFrameThread";
             _formFrameThread.IsBackground = true;
 
@@ -240,7 +244,7 @@ namespace WpfApplication1
                 bool isRightPort = (wantedIpEndPoint.Port == receivedIpEndPoint.Port) || wantedIpEndPoint.Port == 0;
                 if (isRightHost && isRightPort)
                 {
-                    //string receivedText = "";
+                    string receivedText = "";
                     int lData = receiveBytes.Length;
                     lock (_ethernetReciveQueue)
                     {
@@ -251,23 +255,23 @@ namespace WpfApplication1
 
                                 _ethernetReciveQueue.Enqueue(receiveBytes[i]);
 
-                                //if (receiveBytes[i] == 0x10)
-                                //{
-                                //    if ((i + 1) < lData)
-                                //    {
-                                //        if (receiveBytes[i + 1] == 0x02)
-                                //        {
-                                //            receivedText += "\n";
-                                //        }
-                                //    }
-                                //    else
-                                //    {
-                                //    }
-                                //}
+                                if (receiveBytes[i] == 0x10)
+                                {
+                                    if ((i + 1) < lData)
+                                    {
+                                        if (receiveBytes[i + 1] == 0x02)
+                                        {
+                                            receivedText += "\n";
+                                        }
+                                    }
+                                    else
+                                    {
+                                    }
+                                }
                             }
-                            //receivedText += string.Format("{0:X2}", receiveBytes[i]);
+                            receivedText += string.Format("{0:X2}", receiveBytes[i]);
                         }
-                        //Debug.Write(receivedText);
+                        Debug.Write(receivedText);
                     }
                     tidFormFrameWaitHandle.Set();
                 }
@@ -280,9 +284,9 @@ namespace WpfApplication1
         }
 
         /// <summary>
-        /// takes bytes from _ethernetReciveQueue and makes them into frames
+        /// takes serial bytes from _ethernetReciveQueue and makes them into frames.
         /// </summary>
-        private void formFrameThread()
+        private void makeFrameThread()
         {
             while (!_shouldStopMain)
             {
@@ -308,16 +312,19 @@ namespace WpfApplication1
             }
         }
 
+        /// <summary>
+        /// takes frames from queue and puts into queues for display and loging
+        /// </summary>
         private void extractDataThread()
         {
             while (!_shouldStopTidExtractData)
             {
                 tidExtractDataWaitHandle.WaitOne();
-                lock (_allLists.workingTagQueue0)
+                lock (allLists.workingTagQueue0)
                 {
-                    if (_allLists.workingTagQueue0.Count > 0)
+                    if (allLists.workingTagQueue0.Count > 0)
                     {
-                        Tag temp = _allLists.workingTagQueue0.Dequeue();
+                        Tag temp = allLists.workingTagQueue0.Dequeue();
                         if (temp != null)
                         {
                             ExtractData(temp);
@@ -327,13 +334,13 @@ namespace WpfApplication1
             }
         }
 
-       
-
+        /// <summary>
+        /// thread to listen to TCP connection
+        /// </summary>
         public void TCPListenThread()
         {
             while (!_shouldStopListen)//(ethernetPort.bActive)
             {
-
                 if (this._tcpClient.Connected)
                 {
                     //try - so we can see if the connection has been dropped or is half open
@@ -352,26 +359,14 @@ namespace WpfApplication1
                         handleTCPconnectionLoss();
                         _errorLog.write(e, "EthernetConnection TCPconnectionLoss");
                     }
-
                     lock (_ethernetReciveQueue)
                     {
                        // ethernetReciveQueue.Enqueue(myByte);  // *********************  removed for DEBUG ****************************************************************
                     }
-
-
                     //if (ethernetReciveQueue.Count != 0)
                     //{
                     //    mainThreadWaitHandle.Set();
                     //}
-
-
-                    ////DEBUG**************************************************
-                    //string myString = string.Format("{0:X2}", myByte);
-                    //using (StreamWriter w = File.AppendText("c:\\log.txt"))
-                    //{
-                    //    Log(myString, w);
-                    //}
-                    ////****************************************************
 
                 }
                 else
@@ -380,16 +375,20 @@ namespace WpfApplication1
                     // comSetup1.button2.IsEnabled = true;
                     MessageBox.Show("error connection lost");
                 }
-
-
             }
         }
 
+        /// <summary>
+        /// Kicks send tread to run with no data
+        /// </summary>
         public void TCPSend()
         {
             _ethernetSendWaitHandle.Set();
         }
-
+        /// <summary>
+        /// Queues items up on TCP send and kicks send tread to run
+        /// </summary>
+        /// <param name="items"></param>
         public void TCPSend(int[] items)
         {
             lock (_ethernetTransmitQueue)
@@ -402,9 +401,11 @@ namespace WpfApplication1
             _ethernetSendWaitHandle.Set();
         }
 
+        /// <summary>
+        /// Thread to send TCP messages
+        /// </summary>
         private void TCPSendThread()
         {
-
             while (!_shouldStopSend)
             {
                 while (this._tcpClient.Connected)   //(ethernetPort.bActive)
@@ -414,41 +415,26 @@ namespace WpfApplication1
                     int queueTempLength = _ethernetTransmitQueue.Count;
                     while (_ethernetTransmitQueue.Count != 0)
                     {
-                        
-                        // ethernetPort.myStream.WriteByte( (byte)(ethernetTransmitQueue.Dequeue()) );
-
-                        //Works with breakpoint here probably becaus it gives it time for the queue to fill up
                         lock (_ethernetTransmitQueue)
                         {
                             this._TCPtxBuffer[this._txBufferPosition] = (byte)(_ethernetTransmitQueue.Dequeue());
                         }
-
-                        //for (int delay = 0; delay < 99999; delay++) //this delay is a frig
-                        //{
-
-                        //}
-
                         if (this._TCPtxBuffer[this._txBufferPosition] == 0)
                         {
                         }
-
                         this._txBufferPosition++;
 
-                        if (this._TCPtxBuffer[(this._txBufferPosition - 1)] == 0) // this was when I was looking for a null before sending
+                        if (this._TCPtxBuffer[(this._txBufferPosition - 1)] == 0) // this was when I was look for a null before sending
                        // if (this.txBufferPosition == queueTempLength) // now I am using the lengh of the queue, this could be a problem if there is 2 messages in the queue
                         {
-
                             try
                             {
-                                this._tcpStream.Write(this._TCPtxBuffer, 0, this._TCPtxBuffer[2] + 3);
-                                
+                                this._tcpStream.Write(this._TCPtxBuffer, 0, this._TCPtxBuffer[2] + 3);       
                             }
                             catch (SocketException e)
                             {
                                 _errorLog.write(e, "EthernetConnection tcpStream.Write");
                             }
-
-
                             int txSequ = this._TCPtxBuffer[5];
 
                             //if (ackBack(txSequ) == false)
@@ -465,51 +451,33 @@ namespace WpfApplication1
                             //    }
                             //}
                             this._txBufferPosition = 0;
-
                             // clear down txbuffer
-
                             int length = this._TCPtxBuffer[3] + 3;
-
                             for (int j = 0; j <= length; j++)
                             {
                                 this._TCPtxBuffer[j] = 0;
                             }
-
                         }
-
                     }
-
                     //code to check if connection is still up
                     try
                     {
                         byte[] keepAlive = new byte[1] { 0x0 }; 
-                        this._tcpStream.Write(keepAlive, 0, 1); //length of one and value of 0x0 sent to check that connection is still up if not = exeption.NOTE A length of 0 dose not rase the exeption! 
-                        
-                        // ethernetPort.myStream.Write(ethernetPort.txBuffer, 0, ethernetPort.txBuffer[3] + 3);
+                        this._tcpStream.Write(keepAlive, 0, 1); //length of one and value of 0x0 sent to check that connection is still up if not = exeption.NOTE A length of 0 dose not rase the exeption!  
                     }
                     catch (SocketException e)
                     {
                         if (e.NativeErrorCode.Equals(10035))
-                           // MessageBox.Show(string.Format("Still Connected, but the Send would block"));
                             _errorLog.write(e, "Ethernet keepAlive write, Still Connected, but the Send would block");
                         else
                         {
-                           // MessageBox.Show(string.Format("Disconnected: error code {0}!", e.NativeErrorCode));
                             _errorLog.write(e, "Ethernet keepAlive write, Disconnected");
-
                         }
-
                     }
                     catch
                     {
-                        //MessageBox.Show("dead");
                         handleTCPconnectionLoss();
                     }
-
-
-
-
-
                 }
             }
 
@@ -519,23 +487,20 @@ namespace WpfApplication1
 
         private bool processRawData(bool Do_Work, byte com_byte)
         {
-            if (_InFrameFlag == 0)
+            if (!_InFrame)
             {
                 if (DleStxCheck(com_byte))
                 {
                     _PortArrayCount = 1;
-                    _InFrameFlag = 1;
+                    _InFrame = true;
                 }
             }
-            if (_InFrameFlag == 1) //Put bytes into array
+            if (_InFrame) //Put bytes into array
             {
-                fillPortArray(com_byte);
-
-                if ((_PortArrayCount == _PktLengthInt) & (_PortArrayCount > 3))                                             //Pull stuff out of array
+                bool frameEnd = fillPortArray(com_byte);
+                if (frameEnd)                                             
                 {
                     uint stripCount = DleStrip();
-                    const int checkSumLength = 4;
-                    const int dleStxLength = 2;
                     uint ckSumCalc = calcAdler32(3, (uint)_PktLengthInt - checkSumLength - dleStxLength - stripCount);  //Minus checksum from length 
                     lock (_PortArray)
                     {
@@ -543,7 +508,7 @@ namespace WpfApplication1
                     }
                     if (_WorkingTag.CheckSum == _WorkingTag.calculatedCheckSum)
                     {
-                        _allLists.workingTagQueue0.Enqueue(_WorkingTag);
+                        allLists.workingTagQueue0.Enqueue(_WorkingTag);
                         tidExtractDataWaitHandle.Set();
 
                         if (_WorkingTag.BrCmd > 0)
@@ -581,9 +546,9 @@ namespace WpfApplication1
                             {
                                 _WorkingTag.BrCmd = 0xf0;    //these BrCmds I have made up just to send messages in this app
                             }
-                            lock (_allLists.rxMessageQueue)
+                            lock (allLists.rxMessageQueue)
                             {
-                                _allLists.rxMessageQueue.Enqueue(_WorkingTag);
+                                allLists.rxMessageQueue.Enqueue(_WorkingTag);
 
                             }
                             _messageWindow1.rxMessageWaitHandle.Set();
@@ -595,14 +560,14 @@ namespace WpfApplication1
                         Debug.WriteLine("checksum fail count = {0}", _checkSumFails);
                     }
 
-                    _InFrameFlag = 0;
+                    _InFrame = false;
                     _PortArrayCount = 0;
 
                     for (int i = 0; i < _PortArrayMax; i++)
                     {
                         _PortArray[i] = 0;                          //Clear Down Array
                     }
-                }
+                } //if frame end
 
                 if (_PortArrayCount < _PortArrayMax - 1)
                 {
@@ -610,7 +575,7 @@ namespace WpfApplication1
                 }
                 else
                 { //PortArrayCount Error
-                    _InFrameFlag = 0;
+                    _InFrame = false;
                     _PortArrayCount = 0;
                 }
 
@@ -618,8 +583,12 @@ namespace WpfApplication1
 
             return Do_Work;
         }
-
-        private void fillPortArray(byte com_byte)
+        /// <summary>
+        /// puts bytes into byte array true when _PortArrayCount equals _PktLengthInt 
+        /// </summary>
+        /// <param name="com_byte"></param>
+        /// <returns>true when _PortArrayCount equals _PktLengthInt </returns>
+        private bool fillPortArray(byte com_byte)
         {
             _PortArray[_PortArrayCount] = com_byte;
             if (_PortArrayCount == 2)                                                         //Pull out packet length once we have it
@@ -628,7 +597,7 @@ namespace WpfApplication1
             }
             if (_PktLengthInt > _PortArrayMax - 1)   //ERROR THE LENGTH IS WAY TO BIG!!!
             {
-                _InFrameFlag = 0;
+                _InFrame = false;
                 _PortArrayCount = 0;
                 _PktLengthInt = 0;
                 for (int i = 0; i < _PortArrayMax; i++)
@@ -636,8 +605,18 @@ namespace WpfApplication1
                     _PortArray[i] = 1;                          //Clear Down Array
                 }
             }
+
+            if((_PortArrayCount == _PktLengthInt) & (_PortArrayCount > 3))
+            {return true;}
+            else
+            {return false;}
         }
 
+        /// <summary>
+        /// Checks for start of framw DLE STX
+        /// </summary>
+        /// <param name="com_byte"></param>
+        /// <returns></returns>
         private bool DleStxCheck(byte com_byte)
         {
             if (com_byte == DLE)                      //Possible SoF
@@ -653,173 +632,85 @@ namespace WpfApplication1
             }
             return false;
         }
+        /// <summary>
+        /// puts tag data into lists for diaplay
+        /// </summary>
+        /// <param name="tag"></param>
         private void ExtractData(Tag tag)
         {
-
-
-
-            //First extract all the data into tag Object
-
-
-            string[] returnString = _MNform.addMacToMinersNames(tag.TagAdd);
-
-            tag.Name = returnString[0];
-            tag.endPointType = returnString[1];
-
+            string[] minersName = _MNform.addMacToMinersNames(tag.TagAdd);
+            tag.Name = minersName[0];
+            tag.endPointType = minersName[1];
             if (tag.BrSequ != 0)
             {
-                _allLists.brSequReciveQueue.Enqueue(tag.BrSequ);
+                allLists.brSequReciveQueue.Enqueue(tag.BrSequ);
             }
-
             //List<tag> myTagList = new List<tag>();
-
             // historyDataBaseAddNew();           //add new data to DB. Adds everything
-
             // string TagReaderAddTemp = tag.TagAdd + tag.ReaderAdd; // TagAddTemp + ReaderAddTemp;
             // need to make list of readers and the tags that they have
-
-            //if (tag.calculatedCheckSum == tag.CheckSum)
-            //{
-
-                if (_DBsetup.trackingEnabled)
+            if (_DBsetup.trackingEnabled)
+            {
+                _dbConnect.trackingDBaseUpDate(tag);          //Adds new tag to DB OR updates tags
+            }
+            allLists.upDateMyReaderList(tag);  //Update List of readers and there tags :FOR TREEVIEW
+            int tagIndex = allLists.allTagList.ToList().FindIndex(item => (item.TagAdd + item.ReaderAdd) == (tag.TagAdd + tag.ReaderAdd)); // Search for uneque tagAdd+routerAdd 
+            if (tagIndex == -1) // not in list
+            {
+                int listSize = allLists.allTagList.Count();
+                upDateAllTagList(tag); // this in turn updates the gridView
+                if (checkListHasGrown(listSize))
                 {
-
-                    _dbConnect.trackingDBaseUpDate(tag);          //Adds new tag to DB OR updates tags
-
-
-                }
-
-                // Update List of readers and there tags
-                _allLists.upDateMyReaderList(tag);  // used for treeview
-               
-                // Create a separate list of all the tagAdd+readerAdd in system
-                // Search for uneque tagAdd+routerAdd 
-                
-               // TagReader searchResultTR = allListsRef.myTagReaderList.Find(TRtest => TRtest.TagReaderAdd == tag.TagAdd + tag.ReaderAdd);
-
-                
-///NOTE TO SELF this is the way to search the binding list !!!   
-///Need to change code to use as it will simplify add and remove
-///
-                //IEnumerable<TagBind> found = allListsRef.allTagList.TakeWhile(item => (item.TagAdd + item.ReaderAdd) == (tag.TagAdd + tag.ReaderAdd));
-                //TagBind test = null;
-                //foreach (TagBind check in found)
-                //{
-                //     test = check;
-                    
-                //}
-
-                int findIndex = _allLists.allTagList.ToList().FindIndex(item => (item.TagAdd + item.ReaderAdd) == (tag.TagAdd + tag.ReaderAdd));
-///**********************************************************
-
-                //if (searchResultTR == null)
-                if(findIndex == -1)
-                {//add to tagReaderList and add to allTagList 
-
-                  //  TagReader NewTagReader = new TagReader { TagReaderAdd = tag.TagAdd + tag.ReaderAdd };
-                  //  allListsRef.myTagReaderList.Add(NewTagReader);
-                    upDateDataGridView(tag); // adds to allTagList
-                 //   int indexTR = allListsRef.myTagReaderList.IndexOf(NewTagReader); // get an index to update from myTagReaderList
-                    int indexTR = _allLists.allTagList.ToList().FindIndex(item => (item.TagAdd + item.ReaderAdd) == (tag.TagAdd + tag.ReaderAdd));
-
+                    int indexTR = allLists.allTagList.ToList().FindIndex(item => (item.TagAdd + item.ReaderAdd) == (tag.TagAdd + tag.ReaderAdd));
                     if (indexTR != -1)
                     {
-                        updateBingingList(indexTR, tag);
+                        allLists.updateBingingList(indexTR, tag);
                     }
                     else
                     {
-                        
+                        _errorLog.write("not in binding list");
                     }
                 }
-                else
-                {// update values in allTagList
-                   // int indexTR = allListsRef.myTagReaderList.IndexOf(searchResultTR); // get an index to update from myTagReaderList
+                else { _errorLog.write("not added to list: Break!"); }
+            }
+            else
+            {
+                allLists.updateBingingList(tagIndex, tag);
+            }
+        }
 
-                    // dataGridView1.Invoke(new EventHandler(delegate  //need to invoke datagridview1 because allTagList is linked to it
-                    // {
-
-                   
-                        updateBingingList(findIndex, tag);
-                
-                    
-
-                    //  }));
-
+        
+        private bool checkListHasGrown(int listSize)
+        {
+            int escape = 0;
+            while (listSize == allLists.allTagList.Count()) // wait for it to be added to the list. Have to wait because it's on WPF another thread
+            {
+                Thread.Sleep(10);
+                escape++;
+                if (escape == 10)
+                {
+                    return false;
                 }
-            //}
-            //else
-            //{
-            //    checkSumFails++;
-            //    Debug.WriteLine("checksum fail count = {0}", checkSumFails);
-                
-            //}
-
+            }
+            return true;
         }
-
-        private void updateBingingList(int indexTR, Tag tag)
+        /// <summary>
+        /// Invoke update to allTagList
+        /// </summary>
+        /// <param name="tag"></param>
+        public void upDateAllTagList(Tag tag)
         {
-            _allLists.allTagList[indexTR].PktLength = tag.PktLength;
-            _allLists.allTagList[indexTR].PktSequence = tag.PktSequence;
-            _allLists.allTagList[indexTR].PktType = tag.PktType;
-            _allLists.allTagList[indexTR].PktEvent = tag.PktEvent;
-            _allLists.allTagList[indexTR].PktTemp = tag.PktTemp;
-            _allLists.allTagList[indexTR].iVolt = tag.Volt;
-            _allLists.allTagList[indexTR].PktLqi = tag.PktLqi;
-            _allLists.allTagList[indexTR].BrSequ = tag.BrSequ;
-            _allLists.allTagList[indexTR].BrCmd = tag.BrCmd;
-            _allLists.allTagList[indexTR].TOFping = tag.TOFping;
-            _allLists.allTagList[indexTR].TOFtimeout = tag.TOFtimeout;
-            _allLists.allTagList[indexTR].TOFrefuse = tag.TOFrefuse;
-            _allLists.allTagList[indexTR].TOFsuccess = tag.TOFsuccess;
-            _allLists.allTagList[indexTR].TOFdistance = tag.TOFdistance;
-            _allLists.allTagList[indexTR].RSSIdistance = tag.RSSIdistance;
-            _allLists.allTagList[indexTR].TOFerror = tag.TOFerror;
-            _allLists.allTagList[indexTR].TOFmac = tag.TOFmac;
-            _allLists.allTagList[indexTR].ReaderAdd = tag.ReaderAdd;
-            _allLists.allTagList[indexTR].RxLQI = tag.RxLQI;
-            _allLists.allTagList[indexTR].TagAdd = tag.TagAdd;
-            _allLists.allTagList[indexTR].CH4gas = tag.CH4gas;
-            _allLists.allTagList[indexTR].COgas = tag.COgas;
-            _allLists.allTagList[indexTR].O2gas = tag.O2gas;
-            _allLists.allTagList[indexTR].CO2gas = tag.CO2gas;
-            _allLists.allTagList[indexTR].minersName = tag.Name;
-            _allLists.allTagList[indexTR].endPointType = tag.endPointType;
-            _allLists.allTagList[indexTR].TTL = 10;
-
-            //for pullkey
-            _allLists.allTagList[indexTR].u54 = tag.u54;
-            _allLists.allTagList[indexTR].u55 = tag.u55;
-            _allLists.allTagList[indexTR].u56 = tag.u56;
-            _allLists.allTagList[indexTR].u57 = tag.u57;
-            _allLists.allTagList[indexTR].u58 = tag.u58;
-            _allLists.allTagList[indexTR].u59 = tag.u59;
-            _allLists.allTagList[indexTR].u60 = tag.u60;
-            _allLists.allTagList[indexTR].u61 = tag.u61;
-        }
-
-        public void upDateDataGridView(Tag tag)
-        {
-
-            //if (this.dataGridView1.InvokeRequired)
-            //{
-            //    this.BeginInvoke(new MethodInvoker(() => upDateDataGridView()));
-            //}
-            //else
-            //{
             System.Windows.Application.Current.Dispatcher.Invoke(
             System.Windows.Threading.DispatcherPriority.Normal,
             (Action)delegate()
             {
                 // Your Action Code
-                _allLists.allTagList.Add(new TagBind(ref tag));  // PortArray));
+                allLists.allTagList.Add(new TagBind(ref tag));  // PortArray));
             });
-
-
-
-
-            //}
-
         }
+        /// <summary>
+        /// Tracking databse setup
+        /// </summary>
         private void trackingDataBaseSetup()
         {
             if (Properties.Settings.Default.EnableTracking)
@@ -833,11 +724,13 @@ namespace WpfApplication1
 
         }
 
+        /// <summary>
+        /// Strips double DLE from frame
+        /// </summary>
+        /// <returns></returns>
         private uint DleStrip()
         {
             uint count = 0;
-
-
             for (int i = 1; i <= (_PortArrayCount - 1); i++)
             {
                 if (_PortArray[i] == DLE)
@@ -852,13 +745,16 @@ namespace WpfApplication1
                         }
                     count++;
                     }
-
-
                 }
             }
             return count;
-
         }
+        /// <summary>
+        /// Calculate Adler Checksum
+        /// </summary>
+        /// <param name="startPoint"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
         private uint calcAdler32(int startPoint, uint length)
         {
             uint ckSumCalc;
@@ -879,11 +775,12 @@ namespace WpfApplication1
             }
             return ckSumCalc;
         }
+        
+       /// <summary>
+       /// handles TCP conection loss. Stops UDP and TCP
+       /// </summary>
         private void handleTCPconnectionLoss()
         {
-           // comSetup1.button2.IsEnabled = true;
-            //comSetup1.coordIpList[0].connected = "false";
-
             try
             {
                 _com.coordIpList[_index].connected = false;
@@ -896,16 +793,13 @@ namespace WpfApplication1
             this._shouldStopSend = true;
             _udpCallbackRun = false;
             _udPclient.Close();
-            
-           // this.tidListen.Abort();
-           // this.tidSend.Abort();
-
-
         }
 
-        public void TCPAbort()
+        /// <summary>
+        /// abourts running threads and callbacks for ethernet connections
+        /// </summary>
+        public void EthernetAbort()
         {
-
             try
             {
                 _udpCallbackRun = false;
@@ -936,23 +830,6 @@ namespace WpfApplication1
                 catch { }
   
         }
-        
-        public void RequestListenStop()
-        {
-            this._shouldStopListen = true;
-            this._shouldStopTidExtractData = true;
-        }
-        public void RequestSendStop()
-        {
-            this._shouldStopSend = true;
-        }
-        public void RequestSendMain()
-        {
-            this._shouldStopMain = true;
-        }
-
-
-
-       
+               
     }
 }

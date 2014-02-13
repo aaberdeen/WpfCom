@@ -178,5 +178,1097 @@ namespace WpfApplication1.Properties {
                 this["MinersNames"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int TTLindex {
+            get {
+                return ((int)(this["TTLindex"]));
+            }
+            set {
+                this["TTLindex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int TTLwidth {
+            get {
+                return ((int)(this["TTLwidth"]));
+            }
+            set {
+                this["TTLwidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int minersNameindex {
+            get {
+                return ((int)(this["minersNameindex"]));
+            }
+            set {
+                this["minersNameindex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int minersNameWidth {
+            get {
+                return ((int)(this["minersNameWidth"]));
+            }
+            set {
+                this["minersNameWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public int PktLengthindex {
+            get {
+                return ((int)(this["PktLengthindex"]));
+            }
+            set {
+                this["PktLengthindex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int PktLengthWidth {
+            get {
+                return ((int)(this["PktLengthWidth"]));
+            }
+            set {
+                this["PktLengthWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2")]
+        public int PktSequenceindex {
+            get {
+                return ((int)(this["PktSequenceindex"]));
+            }
+            set {
+                this["PktSequenceindex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int PktSequenceWidth {
+            get {
+                return ((int)(this["PktSequenceWidth"]));
+            }
+            set {
+                this["PktSequenceWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("3")]
+        public int PktTypeindex {
+            get {
+                return ((int)(this["PktTypeindex"]));
+            }
+            set {
+                this["PktTypeindex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int PktTypeWidth {
+            get {
+                return ((int)(this["PktTypeWidth"]));
+            }
+            set {
+                this["PktTypeWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("4")]
+        public int PktEventindex {
+            get {
+                return ((int)(this["PktEventindex"]));
+            }
+            set {
+                this["PktEventindex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int PktEventWidth {
+            get {
+                return ((int)(this["PktEventWidth"]));
+            }
+            set {
+                this["PktEventWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5")]
+        public int PktTempindex {
+            get {
+                return ((int)(this["PktTempindex"]));
+            }
+            set {
+                this["PktTempindex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int PktTempWidth {
+            get {
+                return ((int)(this["PktTempWidth"]));
+            }
+            set {
+                this["PktTempWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("6")]
+        public int Voltindex {
+            get {
+                return ((int)(this["Voltindex"]));
+            }
+            set {
+                this["Voltindex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int VoltWidth {
+            get {
+                return ((int)(this["VoltWidth"]));
+            }
+            set {
+                this["VoltWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("7")]
+        public int PktLqiIndex {
+            get {
+                return ((int)(this["PktLqiIndex"]));
+            }
+            set {
+                this["PktLqiIndex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int PktLqiWidth {
+            get {
+                return ((int)(this["PktLqiWidth"]));
+            }
+            set {
+                this["PktLqiWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("8")]
+        public int BrSequIndex {
+            get {
+                return ((int)(this["BrSequIndex"]));
+            }
+            set {
+                this["BrSequIndex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int BrSequWidth {
+            get {
+                return ((int)(this["BrSequWidth"]));
+            }
+            set {
+                this["BrSequWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("9")]
+        public int BrCmdIndex {
+            get {
+                return ((int)(this["BrCmdIndex"]));
+            }
+            set {
+                this["BrCmdIndex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int BrCmdWidth {
+            get {
+                return ((int)(this["BrCmdWidth"]));
+            }
+            set {
+                this["BrCmdWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        public int TOFpingIndex {
+            get {
+                return ((int)(this["TOFpingIndex"]));
+            }
+            set {
+                this["TOFpingIndex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int TOFpingWidth {
+            get {
+                return ((int)(this["TOFpingWidth"]));
+            }
+            set {
+                this["TOFpingWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("11")]
+        public int TOFtimeoutIndex {
+            get {
+                return ((int)(this["TOFtimeoutIndex"]));
+            }
+            set {
+                this["TOFtimeoutIndex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int TOFtimeoutWidth {
+            get {
+                return ((int)(this["TOFtimeoutWidth"]));
+            }
+            set {
+                this["TOFtimeoutWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("12")]
+        public int TOFrefuseIndex {
+            get {
+                return ((int)(this["TOFrefuseIndex"]));
+            }
+            set {
+                this["TOFrefuseIndex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int TOFrefuseWidth {
+            get {
+                return ((int)(this["TOFrefuseWidth"]));
+            }
+            set {
+                this["TOFrefuseWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("13")]
+        public int TOFsuccessIndex {
+            get {
+                return ((int)(this["TOFsuccessIndex"]));
+            }
+            set {
+                this["TOFsuccessIndex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int TOFsuccessWidth {
+            get {
+                return ((int)(this["TOFsuccessWidth"]));
+            }
+            set {
+                this["TOFsuccessWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("14")]
+        public int TOFdistanceIndex {
+            get {
+                return ((int)(this["TOFdistanceIndex"]));
+            }
+            set {
+                this["TOFdistanceIndex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int TOFdistanceWidth {
+            get {
+                return ((int)(this["TOFdistanceWidth"]));
+            }
+            set {
+                this["TOFdistanceWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("15")]
+        public int RSSIdistanceIndex {
+            get {
+                return ((int)(this["RSSIdistanceIndex"]));
+            }
+            set {
+                this["RSSIdistanceIndex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int RSSIdistanceWidth {
+            get {
+                return ((int)(this["RSSIdistanceWidth"]));
+            }
+            set {
+                this["RSSIdistanceWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("16")]
+        public int TOFerrorIndex {
+            get {
+                return ((int)(this["TOFerrorIndex"]));
+            }
+            set {
+                this["TOFerrorIndex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int TOFerrorWidth {
+            get {
+                return ((int)(this["TOFerrorWidth"]));
+            }
+            set {
+                this["TOFerrorWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("17")]
+        public int TOFmacIndex {
+            get {
+                return ((int)(this["TOFmacIndex"]));
+            }
+            set {
+                this["TOFmacIndex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int TOFmacWidth {
+            get {
+                return ((int)(this["TOFmacWidth"]));
+            }
+            set {
+                this["TOFmacWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("18")]
+        public int ReaderAddIndex {
+            get {
+                return ((int)(this["ReaderAddIndex"]));
+            }
+            set {
+                this["ReaderAddIndex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int ReaderAddWidth {
+            get {
+                return ((int)(this["ReaderAddWidth"]));
+            }
+            set {
+                this["ReaderAddWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("19")]
+        public int endPointTypeIndex {
+            get {
+                return ((int)(this["endPointTypeIndex"]));
+            }
+            set {
+                this["endPointTypeIndex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int endPointTypeWidth {
+            get {
+                return ((int)(this["endPointTypeWidth"]));
+            }
+            set {
+                this["endPointTypeWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("20")]
+        public int tagAddIndex {
+            get {
+                return ((int)(this["tagAddIndex"]));
+            }
+            set {
+                this["tagAddIndex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int tagAddWidth {
+            get {
+                return ((int)(this["tagAddWidth"]));
+            }
+            set {
+                this["tagAddWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("21")]
+        public int BrSequPersistInt {
+            get {
+                return ((int)(this["BrSequPersistInt"]));
+            }
+            set {
+                this["BrSequPersistInt"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int BrSequPersistWidth {
+            get {
+                return ((int)(this["BrSequPersistWidth"]));
+            }
+            set {
+                this["BrSequPersistWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("22")]
+        public int unitIDIndex {
+            get {
+                return ((int)(this["unitIDIndex"]));
+            }
+            set {
+                this["unitIDIndex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int unitIDWidth {
+            get {
+                return ((int)(this["unitIDWidth"]));
+            }
+            set {
+                this["unitIDWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("23")]
+        public int zoneIDIndex {
+            get {
+                return ((int)(this["zoneIDIndex"]));
+            }
+            set {
+                this["zoneIDIndex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int zoneIDWidth {
+            get {
+                return ((int)(this["zoneIDWidth"]));
+            }
+            set {
+                this["zoneIDWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("23")]
+        public int RxLQIInxex {
+            get {
+                return ((int)(this["RxLQIInxex"]));
+            }
+            set {
+                this["RxLQIInxex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int RxLQIWidth {
+            get {
+                return ((int)(this["RxLQIWidth"]));
+            }
+            set {
+                this["RxLQIWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("23")]
+        public int CH4gasIndex {
+            get {
+                return ((int)(this["CH4gasIndex"]));
+            }
+            set {
+                this["CH4gasIndex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int CH4gasWidth {
+            get {
+                return ((int)(this["CH4gasWidth"]));
+            }
+            set {
+                this["CH4gasWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("23")]
+        public int COgasIndex {
+            get {
+                return ((int)(this["COgasIndex"]));
+            }
+            set {
+                this["COgasIndex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int COgasWidth {
+            get {
+                return ((int)(this["COgasWidth"]));
+            }
+            set {
+                this["COgasWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("23")]
+        public int O2gasIndex {
+            get {
+                return ((int)(this["O2gasIndex"]));
+            }
+            set {
+                this["O2gasIndex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int O2gasWidth {
+            get {
+                return ((int)(this["O2gasWidth"]));
+            }
+            set {
+                this["O2gasWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("23")]
+        public int CO2gasIndex {
+            get {
+                return ((int)(this["CO2gasIndex"]));
+            }
+            set {
+                this["CO2gasIndex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int CO2gasWidth {
+            get {
+                return ((int)(this["CO2gasWidth"]));
+            }
+            set {
+                this["CO2gasWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("23")]
+        public int failStateIndex {
+            get {
+                return ((int)(this["failStateIndex"]));
+            }
+            set {
+                this["failStateIndex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int failStateWidth {
+            get {
+                return ((int)(this["failStateWidth"]));
+            }
+            set {
+                this["failStateWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("23")]
+        public int u57Index {
+            get {
+                return ((int)(this["u57Index"]));
+            }
+            set {
+                this["u57Index"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int u57Width {
+            get {
+                return ((int)(this["u57Width"]));
+            }
+            set {
+                this["u57Width"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("23")]
+        public int u54Index {
+            get {
+                return ((int)(this["u54Index"]));
+            }
+            set {
+                this["u54Index"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int u54Width {
+            get {
+                return ((int)(this["u54Width"]));
+            }
+            set {
+                this["u54Width"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("23")]
+        public int u55Index {
+            get {
+                return ((int)(this["u55Index"]));
+            }
+            set {
+                this["u55Index"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int u55Width {
+            get {
+                return ((int)(this["u55Width"]));
+            }
+            set {
+                this["u55Width"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("23")]
+        public int u56Index {
+            get {
+                return ((int)(this["u56Index"]));
+            }
+            set {
+                this["u56Index"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int u56Width {
+            get {
+                return ((int)(this["u56Width"]));
+            }
+            set {
+                this["u56Width"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("23")]
+        public int u58Index {
+            get {
+                return ((int)(this["u58Index"]));
+            }
+            set {
+                this["u58Index"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int u58Width {
+            get {
+                return ((int)(this["u58Width"]));
+            }
+            set {
+                this["u58Width"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("23")]
+        public int switchStateIndex {
+            get {
+                return ((int)(this["switchStateIndex"]));
+            }
+            set {
+                this["switchStateIndex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int switchStateWidth {
+            get {
+                return ((int)(this["switchStateWidth"]));
+            }
+            set {
+                this["switchStateWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("23")]
+        public int ImageIndex {
+            get {
+                return ((int)(this["ImageIndex"]));
+            }
+            set {
+                this["ImageIndex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int ImageWidth {
+            get {
+                return ((int)(this["ImageWidth"]));
+            }
+            set {
+                this["ImageWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("23")]
+        public int remoteLockoutIndex {
+            get {
+                return ((int)(this["remoteLockoutIndex"]));
+            }
+            set {
+                this["remoteLockoutIndex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int remoteLockoutWidth {
+            get {
+                return ((int)(this["remoteLockoutWidth"]));
+            }
+            set {
+                this["remoteLockoutWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("23")]
+        public int keyShortIndex {
+            get {
+                return ((int)(this["keyShortIndex"]));
+            }
+            set {
+                this["keyShortIndex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int keyShortWidth {
+            get {
+                return ((int)(this["keyShortWidth"]));
+            }
+            set {
+                this["keyShortWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("23")]
+        public int switchErrorIndex {
+            get {
+                return ((int)(this["switchErrorIndex"]));
+            }
+            set {
+                this["switchErrorIndex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int switchErrorWidth {
+            get {
+                return ((int)(this["switchErrorWidth"]));
+            }
+            set {
+                this["switchErrorWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("23")]
+        public int RLO_ErrorIndex {
+            get {
+                return ((int)(this["RLO_ErrorIndex"]));
+            }
+            set {
+                this["RLO_ErrorIndex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int RLO_ErrorWidth {
+            get {
+                return ((int)(this["RLO_ErrorWidth"]));
+            }
+            set {
+                this["RLO_ErrorWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("23")]
+        public int dcVoltsStateIndex {
+            get {
+                return ((int)(this["dcVoltsStateIndex"]));
+            }
+            set {
+                this["dcVoltsStateIndex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int dcVoltsStateWidth {
+            get {
+                return ((int)(this["dcVoltsStateWidth"]));
+            }
+            set {
+                this["dcVoltsStateWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("23")]
+        public int adcReadError1Index {
+            get {
+                return ((int)(this["adcReadError1Index"]));
+            }
+            set {
+                this["adcReadError1Index"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int adcReadError1Width {
+            get {
+                return ((int)(this["adcReadError1Width"]));
+            }
+            set {
+                this["adcReadError1Width"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("23")]
+        public int adcReadError2Index {
+            get {
+                return ((int)(this["adcReadError2Index"]));
+            }
+            set {
+                this["adcReadError2Index"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
+        public int adcReadError2Width {
+            get {
+                return ((int)(this["adcReadError2Width"]));
+            }
+            set {
+                this["adcReadError2Width"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("23")]
+        public int Setting {
+            get {
+                return ((int)(this["Setting"]));
+            }
+            set {
+                this["Setting"] = value;
+            }
+        }
     }
 }

@@ -347,7 +347,7 @@
 
 
             <Menu Name="menu1" Grid.ColumnSpan="2">
-                <MenuItem Header="File">
+                <MenuItem Header="File" Click="MenuItem_Click_3">
                     <MenuItem Header="Load" Click="MenuItem_Click_1"></MenuItem>
                     <MenuItem Header="Save" Click="MenuItem_Click_2"></MenuItem>
                     <MenuItem Header="Exit" Click="MenuItem_Exit_Click" />

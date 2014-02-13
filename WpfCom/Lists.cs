@@ -58,9 +58,6 @@ namespace WpfApplication1
            
         }
 
- 
-
-
         public void upDateMyReaderList(Tag WorkingTag)
         {
             //Node treeItem = null;
@@ -180,5 +177,45 @@ namespace WpfApplication1
             }
         }
 
+        public void updateBingingList(int indexTR, Tag tag)
+        {
+            allTagList[indexTR].PktLength = tag.PktLength;
+            allTagList[indexTR].PktSequence = tag.PktSequence;
+            allTagList[indexTR].PktType = tag.PktType;
+            allTagList[indexTR].PktEvent = tag.PktEvent;
+            allTagList[indexTR].PktTemp = tag.PktTemp;
+            allTagList[indexTR].iVolt = tag.Volt;
+            allTagList[indexTR].PktLqi = tag.PktLqi;
+            allTagList[indexTR].BrSequ = tag.BrSequ;
+            allTagList[indexTR].BrCmd = tag.BrCmd;
+            allTagList[indexTR].TOFping = tag.TOFping;
+            allTagList[indexTR].TOFtimeout = tag.TOFtimeout;
+            allTagList[indexTR].TOFrefuse = tag.TOFrefuse;
+            allTagList[indexTR].TOFsuccess = tag.TOFsuccess;
+            allTagList[indexTR].TOFdistance = tag.TOFdistance;
+            allTagList[indexTR].RSSIdistance = tag.RSSIdistance;
+            allTagList[indexTR].TOFerror = tag.TOFerror;
+            allTagList[indexTR].TOFmac = tag.TOFmac;
+            allTagList[indexTR].ReaderAdd = tag.ReaderAdd;
+            allTagList[indexTR].RxLQI = tag.RxLQI;
+            allTagList[indexTR].TagAdd = tag.TagAdd;
+            allTagList[indexTR].CH4gas = tag.CH4gas;
+            allTagList[indexTR].COgas = tag.COgas;
+            allTagList[indexTR].O2gas = tag.O2gas;
+            allTagList[indexTR].CO2gas = tag.CO2gas;
+            allTagList[indexTR].minersName = tag.Name;
+            allTagList[indexTR].endPointType = tag.endPointType;
+            allTagList[indexTR].TTL = 10;
+
+            //for pullkey
+            allTagList[indexTR].u54 = tag.u54;
+            allTagList[indexTR].u55 = tag.u55;
+            allTagList[indexTR].u56 = tag.u56;
+            allTagList[indexTR].u57 = tag.u57;
+            allTagList[indexTR].u58 = tag.u58;
+            allTagList[indexTR].u59 = tag.u59;
+            allTagList[indexTR].u60 = tag.u60;
+            allTagList[indexTR].u61 = tag.u61;
+        }
     }
 }

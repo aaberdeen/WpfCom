@@ -52,23 +52,9 @@ namespace WpfApplication1
         /// <returns>name of miner, endPointType</returns>
         public string[] addMacToMinersNames(string macToAdd)
         {
-            //bool search;
-            //NamesBind result;
-            //foreach (var n in minerNames)
-            //{
-            //    if (n.Key == macToAdd)
-            //    {
-            //        search = true;
-                    
-            //    }
-            //}
-
             var test = minerNames.ToList().FirstOrDefault(item => item.MAC == macToAdd);
             string[] returnStrings = new string[2];
-
-            //string a = search.minerName;
-
-            if (test !=null)
+             if (test !=null)
             {
                 
 
