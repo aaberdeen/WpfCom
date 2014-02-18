@@ -6,6 +6,7 @@ using ComPort;
 using System.Drawing;
 using System.IO;
 using System.Collections.Specialized;
+using System.Windows.Threading;
 
 namespace WpfApplication1
 {
@@ -52,7 +53,6 @@ namespace WpfApplication1
         private uint _u59;
         private uint _u60;
         private uint _u61;
-       
         
        
 
@@ -86,7 +86,10 @@ namespace WpfApplication1
             _minersName = TagIn.Name;
             endPointType = TagIn.endPointType;
 
+
         }
+
+ 
 
         public TagBind()
         {

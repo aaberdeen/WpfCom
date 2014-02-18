@@ -134,29 +134,10 @@ namespace WpfApplication1
         /// <param name="e"></param>
         void timerTree_Tick(object sender, EventArgs e)
         {
-            //_tickTimerThread.Start();  cant just start it as it may not have ended so need to do tick in thread. Or somthing like that
-
-
-
-            // this should be done in separate thread to stop screen locking up when can't connect
-            decAllTtlOflistToReturn();
+                        
+            decAllTtlOflistToReturn(); // moved to Ethernetconnection class
             updatConsoleText();
-            foreach (KeyValuePair<string, EthernetConnection> ethCon in _myEthConnList)
-            {
-                ethCon.Value.TCPSend(); //kicks send thread to send a packet to check link
 
-            }
-
-            //foreach (coodData conn in comSetup1.coordIpList)
-            //{
-            //    if (!conn.connected)
-            //    {
-            //        int getIndex = comSetup1.coordIpList.IndexOf(conn);
-            //        //try reconnect
-            //        etherConnect(conn.IP, conn.port, getIndex);
-            //    }
-
-            //}
             if (_connectionThread.ThreadState == System.Threading.ThreadState.Unstarted)
             {
                 _connectionThread.Start();
@@ -290,28 +271,14 @@ namespace WpfApplication1
                         }
                     }
 
-
-
-
-
                     if (EthernetConnection.allLists.listToReturn[i].Children[j].Children[0].TTL <= 1)
                     {
-                        Node remove = EthernetConnection.allLists.listToReturn[i].Children[j];
-
-                        System.Windows.Application.Current.Dispatcher.Invoke(
-                        System.Windows.Threading.DispatcherPriority.Normal,
-                        (Action)delegate()
-                        {
-
-                            EthernetConnection.allLists.listToReturn[i].Children.Remove(remove);
-                            k--;
-                        });
-
+                        Node remove = EthernetConnection.allLists.listToReturn[i].Children[j];                       
+                        EthernetConnection.allLists.listToReturn[i].Children.Remove(remove);
+                         k--;
                     }
                 }
             }
-
-            // List<TagBind> toRemove = new List<TagBind>();
 
             for (int i = 0; i <= (EthernetConnection.allLists.allTagList.Count - 1); i++)
             {
@@ -323,19 +290,6 @@ namespace WpfApplication1
                     EthernetConnection.allLists.allTagList.RemoveAt(i);
                 }
             }
-
-            //   foreach (TagBind tag in toRemove)
-            //   {
-
-            //  allLists.allTagList.Remove(tag);
-
-            // TagReader searchResultTR = allLists.myTagReaderList.Find(TRtest => TRtest.TagReaderAdd == tag.TagAdd + tag.ReaderAdd);
-            // allLists.myTagReaderList.Remove(searchResultTR);
-
-            //    }
-
-
-
         }
 
 
@@ -370,203 +324,208 @@ namespace WpfApplication1
             MenuStart.IsEnabled = false;
             timerTree.Start();
            // int i = dataGridView1.Columns.Count;
+            setUpGridViewOrder();
+
+
+        }
+
+        private void setUpGridViewOrder()
+        {
             foreach (var col in dataGridView1.Columns)
             {
 
 
                 switch (col.Header.ToString())
                 {
-                    case "TTL": 
-                    col.DisplayIndex = Properties.Settings.Default.TTLwidth;
-                    col.Width = Properties.Settings.Default.TTLindex;
-                    break;
+                    case "TTL":
+                        col.DisplayIndex = Properties.Settings.Default.TTLwidth;
+                        col.Width = Properties.Settings.Default.TTLindex;
+                        break;
 
                     case "PktLength":
-                    col.DisplayIndex = Properties.Settings.Default.PktLengthindex;
-                    col.Width = Properties.Settings.Default.PktLengthWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.PktLengthindex;
+                        col.Width = Properties.Settings.Default.PktLengthWidth;
+                        break;
 
                     case "minersName":
-                    col.DisplayIndex = Properties.Settings.Default.minersNameindex;
-                    col.Width = Properties.Settings.Default.minersNameWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.minersNameindex;
+                        col.Width = Properties.Settings.Default.minersNameWidth;
+                        break;
 
                     case "endPointType":
-                    col.DisplayIndex = Properties.Settings.Default.endPointTypeIndex;
-                    col.Width = Properties.Settings.Default.endPointTypeWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.endPointTypeIndex;
+                        col.Width = Properties.Settings.Default.endPointTypeWidth;
+                        break;
 
                     case "PktSequence":
-                    col.DisplayIndex = Properties.Settings.Default.PktSequenceindex;
-                    col.Width = Properties.Settings.Default.PktSequenceWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.PktSequenceindex;
+                        col.Width = Properties.Settings.Default.PktSequenceWidth;
+                        break;
                     case "PktType":
-                    col.DisplayIndex = Properties.Settings.Default.PktTypeindex;
-                    col.Width = Properties.Settings.Default.PktTypeWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.PktTypeindex;
+                        col.Width = Properties.Settings.Default.PktTypeWidth;
+                        break;
                     case "ReaderAdd":
-                    col.DisplayIndex = Properties.Settings.Default.ReaderAddIndex;
-                    col.Width = Properties.Settings.Default.ReaderAddWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.ReaderAddIndex;
+                        col.Width = Properties.Settings.Default.ReaderAddWidth;
+                        break;
                     case "TagAdd":
-                    col.DisplayIndex = Properties.Settings.Default.tagAddIndex;
-                    col.Width = Properties.Settings.Default.tagAddWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.tagAddIndex;
+                        col.Width = Properties.Settings.Default.tagAddWidth;
+                        break;
                     case "PktLqi":
-                    col.DisplayIndex = Properties.Settings.Default.PktLqiIndex;
-                    col.Width = Properties.Settings.Default.PktLqiWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.PktLqiIndex;
+                        col.Width = Properties.Settings.Default.PktLqiWidth;
+                        break;
                     case "PktEvent":
-                    col.DisplayIndex = Properties.Settings.Default.PktEventindex;
-                    col.Width = Properties.Settings.Default.PktEventWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.PktEventindex;
+                        col.Width = Properties.Settings.Default.PktEventWidth;
+                        break;
                     case "PktTemp":
-                    col.DisplayIndex = Properties.Settings.Default.PktTempindex;
-                    col.Width = Properties.Settings.Default.PktTempWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.PktTempindex;
+                        col.Width = Properties.Settings.Default.PktTempWidth;
+                        break;
                     case "Volt":
-                    col.DisplayIndex = Properties.Settings.Default.Voltindex;
-                    col.Width = Properties.Settings.Default.VoltWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.Voltindex;
+                        col.Width = Properties.Settings.Default.VoltWidth;
+                        break;
                     case "BrSequ":
-                    col.DisplayIndex = Properties.Settings.Default.BrSequIndex;
-                    col.Width = Properties.Settings.Default.BrSequWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.BrSequIndex;
+                        col.Width = Properties.Settings.Default.BrSequWidth;
+                        break;
                     case "BrSequPersist":
-                    col.DisplayIndex = Properties.Settings.Default.BrSequPersistInt;
-                    col.Width = Properties.Settings.Default.BrSequPersistWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.BrSequPersistInt;
+                        col.Width = Properties.Settings.Default.BrSequPersistWidth;
+                        break;
                     case "BrCmd":
-                    col.DisplayIndex = Properties.Settings.Default.BrCmdIndex;
-                    col.Width = Properties.Settings.Default.BrCmdWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.BrCmdIndex;
+                        col.Width = Properties.Settings.Default.BrCmdWidth;
+                        break;
                     case "TOFping":
-                    col.DisplayIndex = Properties.Settings.Default.TOFpingIndex;
-                    col.Width = Properties.Settings.Default.TOFpingWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.TOFpingIndex;
+                        col.Width = Properties.Settings.Default.TOFpingWidth;
+                        break;
                     case "TOFtimeout":
-                    col.DisplayIndex = Properties.Settings.Default.TOFtimeoutIndex;
-                    col.Width = Properties.Settings.Default.TOFtimeoutWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.TOFtimeoutIndex;
+                        col.Width = Properties.Settings.Default.TOFtimeoutWidth;
+                        break;
                     case "TOFrefuse":
-                    col.DisplayIndex = Properties.Settings.Default.TOFrefuseIndex;
-                    col.Width = Properties.Settings.Default.TOFrefuseWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.TOFrefuseIndex;
+                        col.Width = Properties.Settings.Default.TOFrefuseWidth;
+                        break;
                     case "TOFSuccess":
-                    col.DisplayIndex = Properties.Settings.Default.TOFsuccessIndex;
-                    col.Width = Properties.Settings.Default.TOFsuccessWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.TOFsuccessIndex;
+                        col.Width = Properties.Settings.Default.TOFsuccessWidth;
+                        break;
                     case "TOFdistance":
-                    col.DisplayIndex = Properties.Settings.Default.TOFdistanceIndex;
-                    col.Width = Properties.Settings.Default.TOFdistanceWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.TOFdistanceIndex;
+                        col.Width = Properties.Settings.Default.TOFdistanceWidth;
+                        break;
                     case "RSSIdistance":
-                    col.DisplayIndex = Properties.Settings.Default.RSSIdistanceIndex;
-                    col.Width = Properties.Settings.Default.RSSIdistanceWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.RSSIdistanceIndex;
+                        col.Width = Properties.Settings.Default.RSSIdistanceWidth;
+                        break;
                     case "TOFerror":
-                    col.DisplayIndex = Properties.Settings.Default.TOFerrorIndex;
-                    col.Width = Properties.Settings.Default.TOFerrorWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.TOFerrorIndex;
+                        col.Width = Properties.Settings.Default.TOFerrorWidth;
+                        break;
                     case "TOFmac":
-                    col.DisplayIndex = Properties.Settings.Default.TOFmacIndex;
-                    col.Width = Properties.Settings.Default.TOFmacWidth;
-                    break;
-                    
+                        col.DisplayIndex = Properties.Settings.Default.TOFmacIndex;
+                        col.Width = Properties.Settings.Default.TOFmacWidth;
+                        break;
+
                     case "unitID":
-                    col.DisplayIndex = Properties.Settings.Default.unitIDIndex;
-                    col.Width = Properties.Settings.Default.unitIDWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.unitIDIndex;
+                        col.Width = Properties.Settings.Default.unitIDWidth;
+                        break;
                     case "zoneID":
-                    col.DisplayIndex = Properties.Settings.Default.zoneIDIndex;
-                    col.Width = Properties.Settings.Default.zoneIDWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.zoneIDIndex;
+                        col.Width = Properties.Settings.Default.zoneIDWidth;
+                        break;
                     case "RxLQI":
-                    col.DisplayIndex = Properties.Settings.Default.RxLQIInxex;
-                    col.Width = Properties.Settings.Default.RxLQIWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.RxLQIInxex;
+                        col.Width = Properties.Settings.Default.RxLQIWidth;
+                        break;
                     case "CH4gas":
-                    col.DisplayIndex = Properties.Settings.Default.CH4gasIndex;
-                    col.Width = Properties.Settings.Default.CH4gasWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.CH4gasIndex;
+                        col.Width = Properties.Settings.Default.CH4gasWidth;
+                        break;
                     case "COgas":
-                    col.DisplayIndex = Properties.Settings.Default.COgasIndex;
-                    col.Width = Properties.Settings.Default.COgasWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.COgasIndex;
+                        col.Width = Properties.Settings.Default.COgasWidth;
+                        break;
                     case "O2gas":
-                    col.DisplayIndex = Properties.Settings.Default.O2gasIndex;
-                    col.Width = Properties.Settings.Default.O2gasWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.O2gasIndex;
+                        col.Width = Properties.Settings.Default.O2gasWidth;
+                        break;
                     case "CO2gas":
-                    col.DisplayIndex = Properties.Settings.Default.CO2gasIndex;
-                    col.Width = Properties.Settings.Default.CO2gasWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.CO2gasIndex;
+                        col.Width = Properties.Settings.Default.CO2gasWidth;
+                        break;
                     case "failState":
-                    col.DisplayIndex = Properties.Settings.Default.failStateIndex;
-                    col.Width = Properties.Settings.Default.failStateWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.failStateIndex;
+                        col.Width = Properties.Settings.Default.failStateWidth;
+                        break;
                     case "u57":
-                    col.DisplayIndex = Properties.Settings.Default.u57Index;
-                    col.Width = Properties.Settings.Default.u57Width;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.u57Index;
+                        col.Width = Properties.Settings.Default.u57Width;
+                        break;
                     case "u54":
-                    col.DisplayIndex = Properties.Settings.Default.u54Index;
-                    col.Width = Properties.Settings.Default.u54Width;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.u54Index;
+                        col.Width = Properties.Settings.Default.u54Width;
+                        break;
                     case "u55":
-                    col.DisplayIndex = Properties.Settings.Default.u55Index;
-                    col.Width = Properties.Settings.Default.u55Width;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.u55Index;
+                        col.Width = Properties.Settings.Default.u55Width;
+                        break;
                     case "u56":
-                    col.DisplayIndex = Properties.Settings.Default.u56Index;
-                    col.Width = Properties.Settings.Default.u56Width;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.u56Index;
+                        col.Width = Properties.Settings.Default.u56Width;
+                        break;
                     case "u58":
-                    col.DisplayIndex = Properties.Settings.Default.u58Index;
-                    col.Width = Properties.Settings.Default.u58Width;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.u58Index;
+                        col.Width = Properties.Settings.Default.u58Width;
+                        break;
                     case "switchState":
-                    col.DisplayIndex = Properties.Settings.Default.switchStateIndex;
-                    col.Width = Properties.Settings.Default.switchStateWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.switchStateIndex;
+                        col.Width = Properties.Settings.Default.switchStateWidth;
+                        break;
                     case "Image":
-                    col.DisplayIndex = Properties.Settings.Default.ImageIndex;
-                    col.Width = Properties.Settings.Default.ImageWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.ImageIndex;
+                        col.Width = Properties.Settings.Default.ImageWidth;
+                        break;
                     case "remoteLockout":
-                    col.DisplayIndex = Properties.Settings.Default.remoteLockoutIndex;
-                    col.Width = Properties.Settings.Default.remoteLockoutWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.remoteLockoutIndex;
+                        col.Width = Properties.Settings.Default.remoteLockoutWidth;
+                        break;
                     case "keyShort":
-                    col.DisplayIndex = Properties.Settings.Default.keyShortIndex;
-                    col.Width = Properties.Settings.Default.keyShortWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.keyShortIndex;
+                        col.Width = Properties.Settings.Default.keyShortWidth;
+                        break;
                     case "switchError":
-                    col.DisplayIndex = Properties.Settings.Default.switchErrorIndex;
-                    col.Width = Properties.Settings.Default.switchErrorWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.switchErrorIndex;
+                        col.Width = Properties.Settings.Default.switchErrorWidth;
+                        break;
                     case "RLO_Error":
-                    col.DisplayIndex = Properties.Settings.Default.RLO_ErrorIndex;
-                    col.Width = Properties.Settings.Default.RLO_ErrorWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.RLO_ErrorIndex;
+                        col.Width = Properties.Settings.Default.RLO_ErrorWidth;
+                        break;
                     case "dcVoltsState":
-                    col.DisplayIndex = Properties.Settings.Default.dcVoltsStateIndex;
-                    col.Width = Properties.Settings.Default.dcVoltsStateWidth;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.dcVoltsStateIndex;
+                        col.Width = Properties.Settings.Default.dcVoltsStateWidth;
+                        break;
                     case "adcReadError1":
-                    col.DisplayIndex = Properties.Settings.Default.adcReadError1Index;
-                    col.Width = Properties.Settings.Default.adcReadError1Width;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.adcReadError1Index;
+                        col.Width = Properties.Settings.Default.adcReadError1Width;
+                        break;
                     case "adcReadError2":
-                    col.DisplayIndex = Properties.Settings.Default.adcReadError2Index;
-                    col.Width = Properties.Settings.Default.adcReadError2Width;
-                    break;
+                        col.DisplayIndex = Properties.Settings.Default.adcReadError2Index;
+                        col.Width = Properties.Settings.Default.adcReadError2Width;
+                        break;
                 }
-                
-       
+
+
             }
-
-
         }
 
 
@@ -710,17 +669,23 @@ namespace WpfApplication1
         {
             SaveConfig();
 
+            saveGridViewOrder();
+
+        }
+
+        private void saveGridViewOrder()
+        {
             foreach (var col in dataGridView1.Columns)
             {
 
                 int width = (int)(float.Parse(col.ActualWidth.ToString()));
-               
+
                 switch (col.Header.ToString())
                 {
 
                     case "TTL":
                         Properties.Settings.Default.TTLwidth = col.DisplayIndex;
-                        
+
                         Properties.Settings.Default.TTLindex = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
 
@@ -735,180 +700,179 @@ namespace WpfApplication1
                         break;
 
                     case "endPointType":
-                        Properties.Settings.Default.endPointTypeIndex= col.DisplayIndex;
+                        Properties.Settings.Default.endPointTypeIndex = col.DisplayIndex;
                         Properties.Settings.Default.endPointTypeWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
 
                     case "PktSequence":
-                        Properties.Settings.Default.PktSequenceindex= col.DisplayIndex;
+                        Properties.Settings.Default.PktSequenceindex = col.DisplayIndex;
                         Properties.Settings.Default.PktSequenceWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "PktType":
-                        Properties.Settings.Default.PktTypeindex= col.DisplayIndex;
+                        Properties.Settings.Default.PktTypeindex = col.DisplayIndex;
                         Properties.Settings.Default.PktTypeWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "ReaderAdd":
-                        Properties.Settings.Default.ReaderAddIndex= col.DisplayIndex;
+                        Properties.Settings.Default.ReaderAddIndex = col.DisplayIndex;
                         Properties.Settings.Default.ReaderAddWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "TagAdd":
-                        Properties.Settings.Default.tagAddIndex= col.DisplayIndex;
+                        Properties.Settings.Default.tagAddIndex = col.DisplayIndex;
                         Properties.Settings.Default.tagAddWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "PktLqi":
-                        Properties.Settings.Default.PktLqiIndex= col.DisplayIndex;
+                        Properties.Settings.Default.PktLqiIndex = col.DisplayIndex;
                         Properties.Settings.Default.PktLqiWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "PktEvent":
-                        Properties.Settings.Default.PktEventindex= col.DisplayIndex;
+                        Properties.Settings.Default.PktEventindex = col.DisplayIndex;
                         Properties.Settings.Default.PktEventWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "PktTemp":
-                        Properties.Settings.Default.PktTempindex= col.DisplayIndex;
+                        Properties.Settings.Default.PktTempindex = col.DisplayIndex;
                         Properties.Settings.Default.PktTempWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "Volt":
-                        Properties.Settings.Default.Voltindex= col.DisplayIndex;
+                        Properties.Settings.Default.Voltindex = col.DisplayIndex;
                         Properties.Settings.Default.VoltWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "BrSequ":
-                        Properties.Settings.Default.BrSequIndex= col.DisplayIndex;
+                        Properties.Settings.Default.BrSequIndex = col.DisplayIndex;
                         Properties.Settings.Default.BrSequWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "BrSequPersist":
-                        Properties.Settings.Default.BrSequPersistInt  = col.DisplayIndex;
+                        Properties.Settings.Default.BrSequPersistInt = col.DisplayIndex;
                         Properties.Settings.Default.BrSequPersistWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "BrCmd":
-                        Properties.Settings.Default.BrCmdIndex= col.DisplayIndex;
+                        Properties.Settings.Default.BrCmdIndex = col.DisplayIndex;
                         Properties.Settings.Default.BrCmdWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "TOFping":
-                        Properties.Settings.Default.TOFpingIndex= col.DisplayIndex;
+                        Properties.Settings.Default.TOFpingIndex = col.DisplayIndex;
                         Properties.Settings.Default.TOFpingWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "TOFtimeout":
-                        Properties.Settings.Default.TOFtimeoutIndex= col.DisplayIndex;
+                        Properties.Settings.Default.TOFtimeoutIndex = col.DisplayIndex;
                         Properties.Settings.Default.TOFtimeoutWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "TOFrefuse":
-                        Properties.Settings.Default.TOFrefuseIndex= col.DisplayIndex;
+                        Properties.Settings.Default.TOFrefuseIndex = col.DisplayIndex;
                         Properties.Settings.Default.TOFrefuseWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "TOFSuccess":
-                        Properties.Settings.Default.TOFsuccessIndex= col.DisplayIndex;
+                        Properties.Settings.Default.TOFsuccessIndex = col.DisplayIndex;
                         Properties.Settings.Default.TOFsuccessWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "TOFdistance":
-                        Properties.Settings.Default.TOFdistanceIndex            = col.DisplayIndex;
+                        Properties.Settings.Default.TOFdistanceIndex = col.DisplayIndex;
                         col.Width = Properties.Settings.Default.TOFdistanceWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "RSSIdistance":
-                        Properties.Settings.Default.RSSIdistanceIndex= col.DisplayIndex;
+                        Properties.Settings.Default.RSSIdistanceIndex = col.DisplayIndex;
                         Properties.Settings.Default.RSSIdistanceWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "TOFerror":
-                        Properties.Settings.Default.TOFerrorIndex= col.DisplayIndex;
+                        Properties.Settings.Default.TOFerrorIndex = col.DisplayIndex;
                         Properties.Settings.Default.TOFerrorWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "TOFmac":
-                        Properties.Settings.Default.TOFmacIndex= col.DisplayIndex;
+                        Properties.Settings.Default.TOFmacIndex = col.DisplayIndex;
                         Properties.Settings.Default.TOFmacWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
 
                     case "unitID":
-                       Properties.Settings.Default.unitIDIndex = col.DisplayIndex;
+                        Properties.Settings.Default.unitIDIndex = col.DisplayIndex;
                         Properties.Settings.Default.unitIDWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "zoneID":
-                        Properties.Settings.Default.zoneIDIndex= col.DisplayIndex;
+                        Properties.Settings.Default.zoneIDIndex = col.DisplayIndex;
                         Properties.Settings.Default.zoneIDWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "RxLQI":
-                        Properties.Settings.Default.RxLQIInxex= col.DisplayIndex;
+                        Properties.Settings.Default.RxLQIInxex = col.DisplayIndex;
                         Properties.Settings.Default.RxLQIWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "CH4gas":
-                        Properties.Settings.Default.CH4gasIndex= col.DisplayIndex;
+                        Properties.Settings.Default.CH4gasIndex = col.DisplayIndex;
                         Properties.Settings.Default.CH4gasWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "COgas":
-                        Properties.Settings.Default.COgasIndex= col.DisplayIndex;
+                        Properties.Settings.Default.COgasIndex = col.DisplayIndex;
                         Properties.Settings.Default.COgasWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "O2gas":
-                        Properties.Settings.Default.O2gasIndex= col.DisplayIndex;
+                        Properties.Settings.Default.O2gasIndex = col.DisplayIndex;
                         Properties.Settings.Default.O2gasWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "CO2gas":
-                        Properties.Settings.Default.CO2gasIndex= col.DisplayIndex;
+                        Properties.Settings.Default.CO2gasIndex = col.DisplayIndex;
                         Properties.Settings.Default.CO2gasWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "failState":
-                        Properties.Settings.Default.failStateIndex= col.DisplayIndex;
+                        Properties.Settings.Default.failStateIndex = col.DisplayIndex;
                         Properties.Settings.Default.failStateWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "u57":
-                        Properties.Settings.Default.u57Index= col.DisplayIndex;
-                       Properties.Settings.Default.u57Width = (int)(float.Parse(col.ActualWidth.ToString()));
+                        Properties.Settings.Default.u57Index = col.DisplayIndex;
+                        Properties.Settings.Default.u57Width = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "u54":
-                        Properties.Settings.Default.u54Index= col.DisplayIndex;
+                        Properties.Settings.Default.u54Index = col.DisplayIndex;
                         Properties.Settings.Default.u54Width = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "u55":
-                        Properties.Settings.Default.u55Index= col.DisplayIndex;
+                        Properties.Settings.Default.u55Index = col.DisplayIndex;
                         Properties.Settings.Default.u55Width = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "u56":
-                        Properties.Settings.Default.u56Index= col.DisplayIndex;
+                        Properties.Settings.Default.u56Index = col.DisplayIndex;
                         Properties.Settings.Default.u56Width = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "u58":
-                        Properties.Settings.Default.u58Index= col.DisplayIndex;
+                        Properties.Settings.Default.u58Index = col.DisplayIndex;
                         Properties.Settings.Default.u58Width = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "switchState":
-                        Properties.Settings.Default.switchStateIndex= col.DisplayIndex;
+                        Properties.Settings.Default.switchStateIndex = col.DisplayIndex;
                         Properties.Settings.Default.switchStateWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "Image":
-                        Properties.Settings.Default.ImageIndex= col.DisplayIndex;
+                        Properties.Settings.Default.ImageIndex = col.DisplayIndex;
                         Properties.Settings.Default.ImageWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "remoteLockout":
-                        Properties.Settings.Default.remoteLockoutIndex= col.DisplayIndex;
+                        Properties.Settings.Default.remoteLockoutIndex = col.DisplayIndex;
                         Properties.Settings.Default.remoteLockoutWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "keyShort":
-                        Properties.Settings.Default.keyShortIndex= col.DisplayIndex;
+                        Properties.Settings.Default.keyShortIndex = col.DisplayIndex;
                         Properties.Settings.Default.keyShortWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "switchError":
-                        Properties.Settings.Default.switchErrorIndex= col.DisplayIndex;
+                        Properties.Settings.Default.switchErrorIndex = col.DisplayIndex;
                         Properties.Settings.Default.switchErrorWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "RLO_Error":
-                       Properties.Settings.Default.RLO_ErrorIndex = col.DisplayIndex;
+                        Properties.Settings.Default.RLO_ErrorIndex = col.DisplayIndex;
                         Properties.Settings.Default.RLO_ErrorWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "dcVoltsState":
-                        Properties.Settings.Default.dcVoltsStateIndex= col.DisplayIndex;
+                        Properties.Settings.Default.dcVoltsStateIndex = col.DisplayIndex;
                         Properties.Settings.Default.dcVoltsStateWidth = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "adcReadError1":
-                        Properties.Settings.Default.adcReadError1Index= col.DisplayIndex;
+                        Properties.Settings.Default.adcReadError1Index = col.DisplayIndex;
                         Properties.Settings.Default.adcReadError1Width = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                     case "adcReadError2":
-                        Properties.Settings.Default.adcReadError2Index= col.DisplayIndex;
+                        Properties.Settings.Default.adcReadError2Index = col.DisplayIndex;
                         Properties.Settings.Default.adcReadError2Width = (int)(float.Parse(col.ActualWidth.ToString()));
                         break;
                 }
                 Properties.Settings.Default.Save();
 
             }
-
         }
 
         private void SaveConfig()

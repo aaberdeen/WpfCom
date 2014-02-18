@@ -6,6 +6,7 @@ using ComPort;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
+using System.Timers;
 
 namespace WpfApplication1
 {
@@ -17,7 +18,7 @@ namespace WpfApplication1
         private string _name = "";
         private string _endPointType = "";
         BindingList<Node> _Children = null;
-        private uint _TTL = 5;
+        private int _TTL = 5;
              
         private int _PktLength;
         private int _PktSequence;
@@ -37,7 +38,7 @@ namespace WpfApplication1
         //private string _TOFmac;
         private string _readerAddress;
         //private int _RxLQI;
-
+        //private static Timer _TickTimer= new Timer(10000);
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -47,6 +48,9 @@ namespace WpfApplication1
         
         public Node()
         {
+
+            //_TickTimer.Elapsed += new ElapsedEventHandler(TickTimer);
+            //_TickTimer.Enabled = true;
         }
         
         public Node(string name, BindingList<Node> Children)
@@ -54,7 +58,12 @@ namespace WpfApplication1
 
             _name = name;
             _Children = Children;
+
+            //_TickTimer.Elapsed += new ElapsedEventHandler(TickTimer);
+            //_TickTimer.Enabled = true;
         }
+
+
 
 
 
@@ -94,7 +103,7 @@ namespace WpfApplication1
             }
         }
 
-        public uint TTL
+        public int TTL
         {
             get
             {

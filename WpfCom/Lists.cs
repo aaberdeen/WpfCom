@@ -40,7 +40,8 @@ namespace WpfApplication1
         {
 
             allTagList = new MySortableBindingList<TagBind>();
-           
+
+          
             //Tag test = new Tag();
             //test.PktLength = 10;
             //test.ReaderAdd = "testMACread";

@@ -10,6 +10,8 @@ using System.Net;
 using System.Diagnostics;
 using WiPANFactory;
 using System.IO;
+using System.Windows.Threading;
+
 
 namespace WpfApplication1
 {
@@ -65,8 +67,9 @@ namespace WpfApplication1
         private string _udpPort;
         const int checkSumLength = 4;
         const int dleStxLength = 2;
-
         public static Lists allLists = new Lists();
+        private static DispatcherTimer _etherTickTimer = new DispatcherTimer();
+       
 
         //public EthernetConnection(string remoteIP, string TCPport, string localIP, string udpPort, ref ComSetup com, ref MinersNamesForm MNform, ref DataBaseSetup DBsetup, bool DBcon, ref Lists allLists, int index, ref Message messageWindow1)
         public EthernetConnection(string remoteIP, string TCPport, string localIP, string udpPort, ref ComSetup com, ref MinersNamesForm MNform, ref DataBaseSetup DBsetup, bool DBcon, int index, ref Message messageWindow1)
@@ -83,6 +86,11 @@ namespace WpfApplication1
             _ethernetSendWaitHandle = new AutoResetEvent(false);
             _remoteIP = remoteIP;
             _TCPport = TCPport;
+            _etherTickTimer.Interval = new TimeSpan(0, 0, 10);
+            _etherTickTimer.Tick += new EventHandler(etherTickTimer);
+            _etherTickTimer.Start();
+            
+
 
             if (DBcon)
             {
@@ -106,6 +114,11 @@ namespace WpfApplication1
             }
         }
 
+        private void etherTickTimer(object sender, EventArgs e)
+        {
+            TCPSend(); //kicks send thread to send a packet to check link
+        }
+      
         /// <summary>
         /// Initalise TCP connection and then send a message to set up the UDP at the far end
         /// </summary>
@@ -125,7 +138,7 @@ namespace WpfApplication1
                 {
                     if (_tcpClient.Connected)
                     {
-                        SendUDPSetupMessage();  
+                        SendUDPSetupMessage();
                     }
                     else
                     {
