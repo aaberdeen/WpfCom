@@ -169,6 +169,7 @@ namespace WpfApplication1
 
         private void ExitApplication()
         {
+            saveGridViewOrder();
             _shouldStopConnectionThread = true;
             ethernetConnectWaitHandle.Set();
             _connectionThread.Abort();
@@ -246,51 +247,33 @@ namespace WpfApplication1
 
 
 
-        /**********************************need to move this to ethernet ******************************************************/
+        
         private void decAllTtlOflistToReturn()
         {
-            //and dec ttl of all tags.
-            for (int i = 0; i <= (EthernetConnection.allLists.listToReturn.Count - 1); i++)
+            //for (int i = 0; i <= (EthernetConnection.allLists.allTagList.Count - 1); i++)
+            for(int i = (EthernetConnection.allLists.allTagList.Count - 1); i>=0; i--) 
             {
-                int k = EthernetConnection.allLists.listToReturn[i].Children.Count - 1;      //dec all tags in list
-                for (int j = 0; j <= k; j++)
-                {
-                    if (EthernetConnection.allLists.listToReturn[i].Children[j].Children[0].TTL != 0)
-                    {
-                        EthernetConnection.allLists.listToReturn[i].Children[j].Children[0].TTL--;
-                    }
 
-                    if (EthernetConnection.allLists.listToReturn[i].Children[j].Children[0].TTL <= 7)
+                if (EthernetConnection.allLists.allTagList[i].TTL <= 7)
+                {
+                    if (EthernetConnection.allLists.allTagList[i].endPointType == "Key")
                     {
-                        if (EthernetConnection.allLists.listToReturn[i].Children[j].endPointType == "Key")
+                        if (EthernetConnection.allLists.allTagList[i].ReaderAdd != "0000000000000000")
                         {
-                            if (EthernetConnection.allLists.listToReturn[i].Children[j].readerAddress != "0000000000000000")
-                            {
-                                _errorLog.write(string.Format("ttl= {0}, reader= {1}, type= {2}", EthernetConnection.allLists.listToReturn[i].Children[j].Children[0].TTL, EthernetConnection.allLists.listToReturn[i].Children[j].Name, EthernetConnection.allLists.listToReturn[i].Children[j].endPointType));
-                            }
+                            _errorLog.write(string.Format("ttl= {0}, reader= {1}, type= {2}", EthernetConnection.allLists.allTagList[i].TTL, EthernetConnection.allLists.allTagList[i].ReaderAdd, EthernetConnection.allLists.allTagList[i].endPointType));
                         }
                     }
-
-                    if (EthernetConnection.allLists.listToReturn[i].Children[j].Children[0].TTL <= 1)
-                    {
-                        Node remove = EthernetConnection.allLists.listToReturn[i].Children[j];                       
-                        EthernetConnection.allLists.listToReturn[i].Children.Remove(remove);
-                         k--;
-                    }
                 }
-            }
-
-            for (int i = 0; i <= (EthernetConnection.allLists.allTagList.Count - 1); i++)
-            {
-                EthernetConnection.allLists.allTagList[i].TTL--;
-                if (EthernetConnection.allLists.allTagList[i].TTL == 0)
+                if (EthernetConnection.allLists.allTagList[i].TTL != 0)
                 {
-
-                    //  toRemove.Add(allLists.allTagList[i]);
+                    EthernetConnection.allLists.allTagList[i].TTL--;
+                }
+                else
+                {
                     EthernetConnection.allLists.allTagList.RemoveAt(i);
                 }
             }
-        }
+       }
 
 
 
@@ -314,16 +297,9 @@ namespace WpfApplication1
             //DataContext = allLists;
             DataContext = EthernetConnection.allLists;                             //static
 
- 
-
-
-
-            //treeView.ItemsSource = allLists.listToReturn;
-            treeView.ItemsSource = EthernetConnection.allLists.listToReturn;       //static
             MenuStop.IsEnabled = true;
             MenuStart.IsEnabled = false;
             timerTree.Start();
-           // int i = dataGridView1.Columns.Count;
             setUpGridViewOrder();
 
 
@@ -668,9 +644,6 @@ namespace WpfApplication1
         private void MenuItem_Click_2(object sender, RoutedEventArgs e)
         {
             SaveConfig();
-
-            saveGridViewOrder();
-
         }
 
         private void saveGridViewOrder()

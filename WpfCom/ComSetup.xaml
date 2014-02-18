@@ -1,16 +1,16 @@
 ﻿<Window x:Class="WpfApplication1.ComSetup"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="ComSetup" Height="364" Width="359" Loaded="Window_Loaded" Left="0" Top="0" Closing="Window_Closing">
+        Title="ComSetup" Height="364" Width="555" Loaded="Window_Loaded" Left="0" Top="0" Closing="Window_Closing">
     <Grid>
-        <TabControl Name="tabControl1">
+        <TabControl Name="tabControl1" Margin="0,0,0,34">
             <TabItem Header="Ethernet" Name="tabItem2">
                 <Grid>
                     <Label Content="" Height="28" HorizontalAlignment="Left" Margin="151,230,0,0" Name="label8" VerticalAlignment="Top" Width="101" />
-                    <Button Content="OK" Height="23" HorizontalAlignment="Left" Margin="6,264,0,0" Name="button3" VerticalAlignment="Top" Width="97" Click="button3_Click" />
+                    <Button Content="OK" Height="23" Margin="420,235,20,0" Name="button3" VerticalAlignment="Top" Click="button3_Click" />
                     <DataGrid Name="CoodTable" AutoGenerateColumns="True" Height="218" Margin="6,6,20,0"  VerticalAlignment="Top" VerticalScrollBarVisibility="Visible"/>
                     <Button Content="Add" Height="23" HorizontalAlignment="Left" Margin="6,231,0,0" Name="button4" VerticalAlignment="Top" Width="97" Click="button4_Click" />
-                    <Button Content="Remove" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="151,232,0,0" RenderTransformOrigin="0.789,0.278" Click="Button_Click"/>
+                    <Button Content="Remove" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="108,232,0,0" RenderTransformOrigin="0.789,0.278" Click="Button_Click"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Serial" Name="tabItem1">

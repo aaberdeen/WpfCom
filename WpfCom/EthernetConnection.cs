@@ -666,7 +666,7 @@ namespace WpfApplication1
             {
                 _dbConnect.trackingDBaseUpDate(tag);          //Adds new tag to DB OR updates tags
             }
-            allLists.upDateMyReaderList(tag);  //Update List of readers and there tags :FOR TREEVIEW
+          //  allLists.upDateMyReaderList(tag);  //Update List of readers and there tags :FOR TREEVIEW
             int tagIndex = allLists.allTagList.ToList().FindIndex(item => (item.TagAdd + item.ReaderAdd) == (tag.TagAdd + tag.ReaderAdd)); // Search for uneque tagAdd+routerAdd 
             if (tagIndex == -1) // not in list
             {

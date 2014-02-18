@@ -365,9 +365,6 @@
 
 
             </Menu>
-            <TreeView Name="treeView" Grid.Row="1" PreviewMouseRightButtonDown="treeView1_PreviewMouseRightButtonDown" Grid.RowSpan="2">
-
-            </TreeView>
             <StatusBar Grid.Row="3" Name="statusBar1" Grid.ColumnSpan="2">
 
                 <StatusBarItem>
