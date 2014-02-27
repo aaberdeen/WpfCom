@@ -440,22 +440,25 @@ namespace WpfApplication1
         private string _IP;
         private string _localIP;
         private string _udpPort;
-        private string _port;
+        private string _TCPport;
         private bool _connected;
         private int _reCons;
+        private TcpClient _tcpClient;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         public coodData(string ipIn, string portIn, bool connectedIn,int index, string localIPin, string udpPortIn)
         {
             this.IP = ipIn;
-            this.port = portIn;
+            this.TCPport = portIn;
             this.connected = connectedIn;
             this.Index = index;
             this.localIP = localIPin;
             this.udpPort = udpPortIn;
         }
 
+
+        
 
         public int Index
         {
@@ -497,12 +500,12 @@ namespace WpfApplication1
             }
         }
 
-        public string port
+        public string TCPport
         {
-            get { return _port; }
+            get { return _TCPport; }
             set
             {
-                _port = value;
+                _TCPport = value;
                 this.NotifyPropertyChanged("port");
             }
         }
@@ -521,6 +524,25 @@ namespace WpfApplication1
                 this.NotifyPropertyChanged("connected");
             }
         }
+
+        //public TcpClient tcpClient
+        //{
+        //    set
+        //    {
+        //        _tcpClient = value;
+        //        this.NotifyPropertyChanged("tcpClient");
+        //        this.NotifyPropertyChanged("tcpConnected");
+        //    }
+        //}
+
+        //public bool tcpConnected
+        //{
+        //    //get 
+        //    //{
+        //    // //   return _tcpClient.Connected;
+        //    //}
+        //}
+
         public int reCons
         {
             get { return _reCons; }

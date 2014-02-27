@@ -218,7 +218,7 @@ namespace WpfApplication1
 
                 // Add a port.
                 data = doc.CreateElement("port");
-                data.InnerText = connection.port;
+                data.InnerText = connection.TCPport;
                 newCoordIP.AppendChild(data);
                 
                 // Add a udpport.

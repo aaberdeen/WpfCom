@@ -11,6 +11,7 @@ using System.Diagnostics;
 using WiPANFactory;
 using System.IO;
 using System.Windows.Threading;
+using System.Collections.Concurrent;
 
 
 namespace WpfApplication1
@@ -33,7 +34,7 @@ namespace WpfApplication1
         /* NetworkStream that will be used */
         private NetworkStream _tcpStream;
         /* TcpClient that will connect for us */
-        private TcpClient _tcpClient;
+        public TcpClient _tcpClient;
         /* Storage space */
         private byte[] _TCPrxBuffer;
         private byte[] _TCPtxBuffer;
@@ -61,37 +62,27 @@ namespace WpfApplication1
        // public AutoResetEvent tidExtractData1WaitHandle= new AutoResetEvent(false);
         private UdpClient _udPclient;
         private bool _udpCallbackRun;
-        private string _remoteIP;
-        private string _TCPport;
-        private string _localIP;
-        private string _udpPort;
-        const int checkSumLength = 4;
+       const int checkSumLength = 4;
         const int dleStxLength = 2;
         public static Lists allLists = new Lists();
         private static DispatcherTimer _etherTickTimer = new DispatcherTimer();
-       
+        public static ConcurrentDictionary<string, EthernetConnection> _myEthConnList = new ConcurrentDictionary<string, EthernetConnection>();
+        private coodData _coordData;
 
-        //public EthernetConnection(string remoteIP, string TCPport, string localIP, string udpPort, ref ComSetup com, ref MinersNamesForm MNform, ref DataBaseSetup DBsetup, bool DBcon, ref Lists allLists, int index, ref Message messageWindow1)
-        public EthernetConnection(string remoteIP, string TCPport, string localIP, string udpPort, ref ComSetup com, ref MinersNamesForm MNform, ref DataBaseSetup DBsetup, bool DBcon, int index, ref Message messageWindow1)
+         public EthernetConnection(coodData coordData, ref ComSetup com, ref MinersNamesForm MNform, ref DataBaseSetup DBsetup, bool DBcon, int index, ref Message messageWindow1)
         {
             _com = com;
             _MNform = MNform;
             _DBsetup = DBsetup;
            // dbConnectRef = DBcon;
-            //_allLists = allLists;                         // remove after tesing
             _index = index;
             _messageWindow1 = messageWindow1;
-            _localIP = localIP;
-            _udpPort = udpPort;
+            _coordData = coordData;
             _ethernetSendWaitHandle = new AutoResetEvent(false);
-            _remoteIP = remoteIP;
-            _TCPport = TCPport;
             _etherTickTimer.Interval = new TimeSpan(0, 0, 10);
             _etherTickTimer.Tick += new EventHandler(etherTickTimer);
             _etherTickTimer.Start();
             
-
-
             if (DBcon)
             {
                 trackingDataBaseSetup();
@@ -125,7 +116,7 @@ namespace WpfApplication1
         /// <returns></returns>
         private bool TCPinit()
         {
-            _tcpClient = new TcpClient(_remoteIP, Int32.Parse(_TCPport));
+            _tcpClient = new TcpClient(_coordData.IP, Int32.Parse(_coordData.TCPport));
             /* Store the NetworkStream */
             _tcpStream = _tcpClient.GetStream();
             /* Create data buffer */
@@ -195,15 +186,15 @@ namespace WpfApplication1
             IPEndPoint remoteSender = new IPEndPoint(IPAddress.Any, 0);
             IPAddress udpAddress;
             int remotePort = 1000;  // 0 listens to all ports rich uses 1000;
-            if (IPAddress.TryParse(_remoteIP, out udpAddress))
+            if (IPAddress.TryParse(_coordData.IP, out udpAddress))
             {
                 remoteSender.Address = udpAddress;
                 remoteSender.Port = remotePort;
                 _udpCallbackRun = true;
-                _udPclient = new UdpClient(Convert.ToInt32(_udpPort));
+                _udPclient = new UdpClient(Convert.ToInt32(_coordData.udpPort));
                 UdpState state = new UdpState(_udPclient, remoteSender);
                 _udPclient.BeginReceive(new AsyncCallback(UdpDataReceived), state);  // this is blocking 
-                _errorLog.write(string.Format("udp setup done {0}:{1}", udpAddress, _udpPort));
+                _errorLog.write(string.Format("udp setup done {0}:{1}", udpAddress, _coordData.udpPort));
             }
             else
             {
@@ -219,9 +210,9 @@ namespace WpfApplication1
             try
             {
                 string UDPSess = "0";
-                string UDPaddress = _localIP;  //"10.1.0.97"; // my pc for now
-                byte[] startFrame = WipanCmd.UDPstart(UDPSess, UDPaddress, _udpPort);
-                byte[] stopframe = WipanCmd.UDPstop(UDPSess, UDPaddress, _udpPort);
+                string UDPaddress = _coordData.localIP;  //"10.1.0.97"; // my pc for now
+                byte[] startFrame = WipanCmd.UDPstart(UDPSess, UDPaddress, _coordData.udpPort);
+                byte[] stopframe = WipanCmd.UDPstop(UDPSess, UDPaddress, _coordData.udpPort);
 
                 //stop 3 times to clear all UDP transmits
                 _tcpStream.Write(stopframe, 0, stopframe.Length);
@@ -257,7 +248,7 @@ namespace WpfApplication1
                 bool isRightPort = (wantedIpEndPoint.Port == receivedIpEndPoint.Port) || wantedIpEndPoint.Port == 0;
                 if (isRightHost && isRightPort)
                 {
-                    string receivedText = "";
+                    //string receivedText = "";
                     int lData = receiveBytes.Length;
                     lock (_ethernetReciveQueue)
                     {
@@ -268,23 +259,23 @@ namespace WpfApplication1
 
                                 _ethernetReciveQueue.Enqueue(receiveBytes[i]);
 
-                                if (receiveBytes[i] == 0x10)
-                                {
-                                    if ((i + 1) < lData)
-                                    {
-                                        if (receiveBytes[i + 1] == 0x02)
-                                        {
-                                            receivedText += "\n";
-                                        }
-                                    }
-                                    else
-                                    {
-                                    }
-                                }
+                                //if (receiveBytes[i] == 0x10)
+                                //{
+                                //    if ((i + 1) < lData)
+                                //    {
+                                //        if (receiveBytes[i + 1] == 0x02)
+                                //        {
+                                //            receivedText += "\n";
+                                //        }
+                                //    }
+                                //    else
+                                //    {
+                                //    }
+                                //}
                             }
-                            receivedText += string.Format("{0:X2}", receiveBytes[i]);
+                            //receivedText += string.Format("{0:X2}", receiveBytes[i]);
                         }
-                        Debug.Write(receivedText);
+                        //Debug.Write(receivedText);
                     }
                     tidFormFrameWaitHandle.Set();
                 }
@@ -370,7 +361,9 @@ namespace WpfApplication1
                     {
                         // MessageBox.Show("connection problem");
                         handleTCPconnectionLoss();
-                        _errorLog.write(e, "EthernetConnection TCPconnectionLoss");
+
+                        _errorLog.write("TCP connection on listen thread");
+                        //_errorLog.write(e, "EthernetConnection TCPconnectionLoss");
                     }
                     lock (_ethernetReciveQueue)
                     {
@@ -481,15 +474,17 @@ namespace WpfApplication1
                     catch (SocketException e)
                     {
                         if (e.NativeErrorCode.Equals(10035))
-                            _errorLog.write(e, "Ethernet keepAlive write, Still Connected, but the Send would block");
+                            _errorLog.write("Ethernet keepAlive write, Still Connected, but the Send would block");
                         else
                         {
-                            _errorLog.write(e, "Ethernet keepAlive write, Disconnected");
+                            //_errorLog.write(e, "Ethernet keepAlive write, Disconnected");
+                            _errorLog.write("TCP connection on send thread : SocketException ");
                         }
                     }
                     catch
                     {
                         handleTCPconnectionLoss();
+                        _errorLog.write("TCP connection on send thread : all exeptions");
                     }
                 }
             }
@@ -667,9 +662,44 @@ namespace WpfApplication1
                 _dbConnect.trackingDBaseUpDate(tag);          //Adds new tag to DB OR updates tags
             }
           //  allLists.upDateMyReaderList(tag);  //Update List of readers and there tags :FOR TREEVIEW
-            int tagIndex = allLists.allTagList.ToList().FindIndex(item => (item.TagAdd + item.ReaderAdd) == (tag.TagAdd + tag.ReaderAdd)); // Search for uneque tagAdd+routerAdd 
+           // int tagIndex = allLists.allTagList.ToList().FindIndex(item => (item.TagAdd + item.ReaderAdd) == (tag.TagAdd + tag.ReaderAdd)); // Search for uneque tagAdd+routerAdd 
+            int tagIndex = -1;
+            int i = 0;                                                                                                                   //This give duplicate entrys occasionaly so switching to fer each
+            var s1 = Stopwatch.StartNew();
+            foreach (TagBind tb in allLists.allTagList)
+            {
+                if (tb.TagAdd == tag.TagAdd)
+                {
+                    if (tb.ReaderAdd == tag.ReaderAdd)
+                    {
+                        tagIndex = i;
+                        break;
+                        //_errorLog.write(string.Format("Duplicate entry  List.tag {0}, list.reader {1}, new.tag {2}, new.reader {3}", tb.TagAdd, tb.ReaderAdd, tag.TagAdd, tag.ReaderAdd));
+                    }
+                }
+                i++;
+            }
+            s1.Stop();
+            const int _max = 100000000;
+            Debug.WriteLine(((double)(s1.Elapsed.TotalMilliseconds)).ToString("0.0000 ms"));
+
             if (tagIndex == -1) // not in list
             {
+               // _errorLog.write("----------");
+                //foreach (TagBind tb in allLists.allTagList)
+                //{
+                //    if (tb.TagAdd == tag.TagAdd)
+                //    {
+                //        if (tb.ReaderAdd == tag.ReaderAdd)
+                //        {
+                //        _errorLog.write(string.Format("Duplicate entry  List.tag {0}, list.reader {1}, new.tag {2}, new.reader {3}", tb.TagAdd, tb.ReaderAdd,tag.TagAdd,tag.ReaderAdd));
+                //        }
+                //    }
+
+                    
+                //}
+                //_errorLog.write("----------");
+
                 int listSize = allLists.allTagList.Count();
                 upDateAllTagList(tag); // this in turn updates the gridView
                 if (checkListHasGrown(listSize))
@@ -805,7 +835,12 @@ namespace WpfApplication1
             this._shouldStopListen = true;
             this._shouldStopSend = true;
             _udpCallbackRun = false;
-            _udPclient.Close();
+            if (_udPclient != null)
+            {
+                _udPclient.Close();
+            }
+            System.Media.SoundPlayer player = new System.Media.SoundPlayer("Warning Siren.wav");
+            player.Play();
         }
 
         /// <summary>

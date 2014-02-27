@@ -239,6 +239,7 @@ namespace WpfApplication1
                     _Volt = value;
                     this.NotifyPropertyChanged("iVolt");
                     this.NotifyPropertyChanged("Volt");
+                    this.NotifyPropertyChanged("lowVolt");
                 }
             }
         }
@@ -248,6 +249,20 @@ namespace WpfApplication1
             {
                 float toReturn = _Volt;
                 return toReturn/1000;
+            }
+        }
+        public bool lowVolt
+        {
+            get
+            {
+                if (Volt < 2.4)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
         }
         public int BrSequ
@@ -825,7 +840,7 @@ namespace WpfApplication1
                 {
                     if ((this.zoneID == "ff") || (this.zoneID == "FF"))
                     {
-                        _errorLog.write(string.Format("DEBUG _u59 ={0}, new value = {1}", _u59, value));
+                        _errorLog.write(string.Format("DEBUG _u59 ={0}, new value = {1}, unitID = {2}, tagMac ={3}  ", _u59, value, unitID, TagAdd));
                     }
                     _u59 = value;
                     this.NotifyPropertyChanged("u59");

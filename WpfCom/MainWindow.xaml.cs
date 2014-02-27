@@ -22,21 +22,18 @@ namespace WpfApplication1
 
     public partial class MainWindow : Window
     {
-        //public Thread _splashThread;      
+        private Thread _splashThread;      
         private errorLog _errorLog = new errorLog();
-        private ConcurrentDictionary<string, EthernetConnection> _myEthConnList = new ConcurrentDictionary<string, EthernetConnection>();
-        public Thread _connectionThread;
+       // private static ConcurrentDictionary<string, EthernetConnection> _myEthConnList = new ConcurrentDictionary<string, EthernetConnection>();
+        private Thread _connectionThread;
         private volatile bool _shouldStopConnectionThread;
-        public AutoResetEvent ethernetConnectWaitHandle;
-        
-        ComSetup comSetup1 = new ComSetup();
+        private AutoResetEvent _ethernetConnectWaitHandle;
+        private static ComSetup _comSetup1 = new ComSetup();
+        private static Message _messageWindow1;
+        private DataBaseSetup _dataBaseSetup1 = new DataBaseSetup();
+        private DispatcherTimer _timerTree = new DispatcherTimer();
+        private static MinersNamesForm _minersNamesForm = new MinersNamesForm();
 
-        Message messageWindow1;
-        DataBaseSetup dataBaseSetup1 = new DataBaseSetup();
-        DispatcherTimer timerTree = new DispatcherTimer();
-        MinersNamesForm minersNamesForm = new MinersNamesForm();
-       // private static Lists allLists;
-    
         private struct tcpMessageType
         {
             public static int SYSTEM_CONFIG = 1;
@@ -51,81 +48,67 @@ namespace WpfApplication1
             public static int RADIO_NETWORK_CONFIG = 3;
         }
 
-        int[] PortArray = new int[200];
-        const int DLE = 0x10;
-        const int STX = 0x2;
-
-
+        
         /// <summary>
         /// Main
         /// </summary>
         public MainWindow()
         {
             InitializeComponent();
-
-            _errorLog.write("Hello");
-            
-   
-
+            _errorLog.write("Welome");
             //_splashThread = new Thread(new ThreadStart(splashThread));
             //_splashThread.SetApartmentState(ApartmentState.STA);
-            //_splashThread.Start();
-
+            //_splashThread.Name = "_splashThread";
+            //_splashThread.IsBackground = true;
             _connectionThread = new Thread(new ThreadStart(connectionThread));
             _connectionThread.Name = "_connectionThread";
-            
+            //_splashThread.IsBackground = true;
             //_splashThread.Start();
-
-           
-
-            
             //subscribe4(comSetup1);
-
-            timerTree.Interval = new TimeSpan(0, 0, 10);
-            timerTree.Tick += new EventHandler(timerTree_Tick);
-          //  allLists = new Lists();
-            messageWindow1 = new Message(ref EthernetConnection.allLists);
-            subscribe(comSetup1);
-            subscribe2(messageWindow1);
-           
+            _timerTree.Interval = new TimeSpan(0, 0, 10);
+            _timerTree.Tick += new EventHandler(timerTree_Tick);
+            _messageWindow1 = new Message(ref EthernetConnection.allLists);
+            subscribe(_comSetup1);
+            subscribe2(_messageWindow1);
             LoadConfig();
-            ethernetConnectWaitHandle = new AutoResetEvent(false);
-          //  messageWindow1 = new Message(ref allLists);
+            _ethernetConnectWaitHandle = new AutoResetEvent(false);
+            //messageWindow1 = new Message(ref allLists);
             //dataGridView1.AutoGenerateColumns = true;
         }
 
+        /// <summary>
+        /// Tread to connect to all ethernet ports.
+        /// When the waithandle is kicked it will check all possible connections and connect if connected already
+        /// </summary>
         private void connectionThread()
-        {
-            
-           
+        {        
             while (!_shouldStopConnectionThread)
             {
-                ethernetConnectWaitHandle.WaitOne(); // blocks thread untill signall is recived 
-                foreach (coodData conn in comSetup1.coordIpList)
+                _ethernetConnectWaitHandle.WaitOne(); // blocks thread untill signall is recived 
+                foreach (coodData conn in _comSetup1.coordIpList)
                 {
                     if (!_shouldStopConnectionThread)
                     {
                         if (!conn.connected)
                         {
-                            int getIndex = comSetup1.coordIpList.IndexOf(conn);
+                            int getIndex = _comSetup1.coordIpList.IndexOf(conn);
                             //try reconnect
-                            etherConnect(conn.IP, conn.localIP, conn.udpPort, conn.port, getIndex);
+                           // etherConnect(conn.IP, conn.localIP, conn.udpPort, conn.port, getIndex);
+                            etherConnect(conn, getIndex);
                         }
                     }
-
                 }
             }
         }
 
+        /// <summary>
+        /// Tread to show splash screen
+        /// </summary>
         public void splashThread()
         {
             new SplashWindow().ShowDialog();
-           // SplashWindow splash = new SplashWindow();
-           // splash.ShowDialog();
         }
         
-        
-
         /// <summary>
         /// Timer used to decrement the time to live of tags in tree view
         /// Also used to check TCP connection
@@ -133,19 +116,14 @@ namespace WpfApplication1
         /// <param name="sender"></param>
         /// <param name="e"></param>
         void timerTree_Tick(object sender, EventArgs e)
-        {
-                        
+        {              
             decAllTtlOflistToReturn(); // moved to Ethernetconnection class
             updatConsoleText();
-
             if (_connectionThread.ThreadState == System.Threading.ThreadState.Unstarted)
             {
                 _connectionThread.Start();
-                
             }
-
-            ethernetConnectWaitHandle.Set();
-
+            _ethernetConnectWaitHandle.Set();
         }
         /// <summary>
         /// Event on click of Port Button on menu
@@ -154,7 +132,7 @@ namespace WpfApplication1
         /// <param name="e"></param>
         private void MenuItem_Port_Click(object sender, RoutedEventArgs e)
         {
-            comSetup1.Show();
+            _comSetup1.Show();
         }
         /// <summary>
         /// Event on click of exit button on menu
@@ -163,104 +141,176 @@ namespace WpfApplication1
         /// <param name="e"></param>
         private void MenuItem_Exit_Click(object sender, RoutedEventArgs e)
         {
-
             ExitApplication();
         }
-
+        /// <summary>
+        /// closes all threds then application is exited
+        /// </summary>
         private void ExitApplication()
         {
             saveGridViewOrder();
             _shouldStopConnectionThread = true;
-            ethernetConnectWaitHandle.Set();
+            _ethernetConnectWaitHandle.Set();
             _connectionThread.Abort();
-                    
-            
-            foreach (KeyValuePair<string, EthernetConnection> ethCon in _myEthConnList)
+            foreach (KeyValuePair<string, EthernetConnection> ethCon in EthernetConnection._myEthConnList)
             {
                 ethCon.Value.EthernetAbort();
             }
-            messageWindow1.Do_Work = false;
-            messageWindow1.shouldStopSendMessageThread = true;
-            messageWindow1.sendMessageWaitHandle.Set(); //kick this so the task can end
-          
-            messageWindow1.Close();
-
+            _messageWindow1.Do_Work = false;
+            _messageWindow1.shouldStopSendMessageThread = true;
+            _messageWindow1.sendMessageWaitHandle.Set(); //kick this so the task can end
+            _messageWindow1.Close();
             Application.Current.Shutdown();
         }
+
+        ///// <summary>
+        ///// Attenpts an ethernet connection
+        ///// </summary>
+        ///// <param name="server"></param>
+        ///// <param name="port"></param>
+        //public void etherConnect(string server, string localIP, string udpPort, string port, int index)
+        //{
+        //    if (Usefull.ValidIP(server))
+        //    {
+        //        bool trackEn = false;
+        //        if (Properties.Settings.Default.EnableTracking)
+        //        {
+        //            trackEn = true;
+        //        }
+
+        //        try
+        //        {   //check to see if it is already in the list if it is remove then add
+
+        //            if (EthernetConnection._myEthConnList.ContainsKey(server))
+        //            {
+        //                if (EthernetConnection._myEthConnList[server]._tcpClient != null)
+        //                {
+        //                    if (!EthernetConnection._myEthConnList[server]._tcpClient.Connected)
+        //                    {
+        //                        EthernetConnection value1;
+        //                        EthernetConnection._myEthConnList.TryRemove(server, out value1);
+                               
+        //                        EthernetConnection newConnect = new EthernetConnection(server, port, localIP, udpPort, ref _comSetup1, ref _minersNamesForm, ref _dataBaseSetup1, trackEn, index, ref _messageWindow1);
+        //                        EthernetConnection._myEthConnList.TryAdd(server, newConnect);
+        //                    }
+        //                    else
+        //                    {
+        //                        _comSetup1.coordIpList[index].connected = true;
+        //                    }
+        //                }
+        //                else //no client so cant be connected
+        //                {
+        //                    EthernetConnection newConnect = new EthernetConnection(server, port, localIP, udpPort, ref _comSetup1, ref _minersNamesForm, ref _dataBaseSetup1, trackEn, index, ref _messageWindow1);
+        //                    EthernetConnection._myEthConnList.TryAdd(server, newConnect);
+        //                }
+        //            }
+        //            else //not in the list
+        //            {
+        //                EthernetConnection newConnect = new EthernetConnection(server, port, localIP, udpPort, ref _comSetup1, ref _minersNamesForm, ref _dataBaseSetup1, trackEn, index, ref _messageWindow1);
+        //                EthernetConnection._myEthConnList.TryAdd(server, newConnect);
+        //            }
+        //        }
+        //        catch (SocketException e)
+        //        {
+        //            _comSetup1.coordIpList[index].connected = false;
+        //            _errorLog.write(e, "MainWindow etherConnect");
+        //        }
+        //    }
+        //    else
+        //    {
+        //        _comSetup1.label8.Content = string.Format("Not valid IP");
+        //    }
+        //}
 
         /// <summary>
         /// Attenpts an ethernet connection
         /// </summary>
         /// <param name="server"></param>
         /// <param name="port"></param>
-        public void etherConnect(string server, string localIP, string udpPort, string port, int index)
+        public void etherConnect(coodData coord, int index)
         {
-            if (Usefull.ValidIP(server))
+            if (Usefull.ValidIP(coord.IP))
             {
+                bool trackEn = false;
+                if (Properties.Settings.Default.EnableTracking)
+                {
+                    trackEn = true;
+                }
+
                 try
                 {   //check to see if it is already in the list if it is remove then add
 
-                    if (_myEthConnList.ContainsKey(server))
+                    if (EthernetConnection._myEthConnList.ContainsKey(coord.IP))
                     {
-                        EthernetConnection value1;
+                        if (EthernetConnection._myEthConnList[coord.IP]._tcpClient != null)
+                        {
+                            if (!EthernetConnection._myEthConnList[coord.IP]._tcpClient.Connected)
+                            {
+                                EthernetConnection value1;
+                                EthernetConnection._myEthConnList.TryRemove(coord.IP, out value1);
 
-                        _myEthConnList.TryRemove(server, out value1);
+                                EthernetConnection newConnect = new EthernetConnection(coord, ref _comSetup1, ref _minersNamesForm, ref _dataBaseSetup1, trackEn, index, ref _messageWindow1);
+                                EthernetConnection._myEthConnList.TryAdd(coord.IP, newConnect);
+                            }
+                            else
+                            {
+                                _comSetup1.coordIpList[index].connected = true;
+                            }
+                        }
+                        else //no client so cant be connected
+                        {
+                            EthernetConnection newConnect = new EthernetConnection(coord, ref _comSetup1, ref _minersNamesForm, ref _dataBaseSetup1, trackEn, index, ref _messageWindow1);
+                            EthernetConnection._myEthConnList.TryAdd(coord.IP, newConnect);
+                        }
                     }
-
-                    bool trackEn = false;
-                    if (Properties.Settings.Default.EnableTracking)
+                    else //not in the list
                     {
-                        trackEn = true;
+                        EthernetConnection newConnect = new EthernetConnection(coord, ref _comSetup1, ref _minersNamesForm, ref _dataBaseSetup1, trackEn, index, ref _messageWindow1);
+                        EthernetConnection._myEthConnList.TryAdd(coord.IP, newConnect);
                     }
-
-                    //EthernetConnection newConnect = new EthernetConnection(server, port, localIP, udpPort, ref comSetup1, ref minersNamesForm, ref dataBaseSetup1, trackEn, ref allLists, index, ref messageWindow1);
-                    EthernetConnection newConnect = new EthernetConnection(server, port, localIP, udpPort, ref comSetup1, ref minersNamesForm, ref dataBaseSetup1, trackEn, index, ref messageWindow1);
-                    _myEthConnList.TryAdd(server, newConnect);
-
-
                 }
                 catch (SocketException e)
                 {
-                    comSetup1.coordIpList[index].connected = false;
+                    _comSetup1.coordIpList[index].connected = false;
                     _errorLog.write(e, "MainWindow etherConnect");
-                    
                 }
-
             }
             else
             {
-                comSetup1.label8.Content = string.Format("Not valid IP");
+                _comSetup1.label8.Content = string.Format("Not valid IP");
             }
         }
 
 
-        public static void Log(string logMessage, TextWriter w)
-        {
-            //w.Write("\r\nLog Entry : ");
-            //w.WriteLine("{0} {1}", DateTime.Now.ToLongTimeString(),
-            //    DateTime.Now.ToLongDateString());
-            //w.WriteLine("  :");
-            // w.WriteLine("  :{0}", logMessage);
-            w.Write("{0}", logMessage);
-            //w.WriteLine("-------------------------------");
-        }
-
-
-
-        
+        /// <summary>
+        /// decrements the TTL of each tag
+        /// </summary>
         private void decAllTtlOflistToReturn()
         {
             //for (int i = 0; i <= (EthernetConnection.allLists.allTagList.Count - 1); i++)
             for(int i = (EthernetConnection.allLists.allTagList.Count - 1); i>=0; i--) 
             {
+                //if (EthernetConnection.allLists.allTagList[i].Volt <= 2.4)
+                //{
+                //    _errorLog.write(string.Format("Low Volt= {0}, tag= {1}, type= {2}", EthernetConnection.allLists.allTagList[i].Volt, EthernetConnection.allLists.allTagList[i].TagAdd, EthernetConnection.allLists.allTagList[i].endPointType));
+                //}
 
                 if (EthernetConnection.allLists.allTagList[i].TTL <= 7)
                 {
-                    if (EthernetConnection.allLists.allTagList[i].endPointType == "Key")
+                    if (EthernetConnection.allLists.allTagList[i].PktEvent == 16384 || EthernetConnection.allLists.allTagList[i].PktEvent == 32768)
+                    {//network message 
+                    }
+                    else
                     {
-                        if (EthernetConnection.allLists.allTagList[i].ReaderAdd != "0000000000000000")
+                        if (EthernetConnection.allLists.allTagList[i].endPointType == "Key")
                         {
-                            _errorLog.write(string.Format("ttl= {0}, reader= {1}, type= {2}", EthernetConnection.allLists.allTagList[i].TTL, EthernetConnection.allLists.allTagList[i].ReaderAdd, EthernetConnection.allLists.allTagList[i].endPointType));
+                            if (EthernetConnection.allLists.allTagList[i].ReaderAdd != "0000000000000000")
+                            {
+                                _errorLog.write(string.Format("ttl= {0}, reader= {1}, type= {2}, tag={3}", EthernetConnection.allLists.allTagList[i].TTL,
+                                                                                                           EthernetConnection.allLists.allTagList[i].ReaderAdd,
+                                                                                                           EthernetConnection.allLists.allTagList[i].endPointType,
+                                                                                                           EthernetConnection.allLists.allTagList[i].TagAdd));
+                            }
                         }
                     }
                 }
@@ -274,45 +324,43 @@ namespace WpfApplication1
                 }
             }
        }
-
-
-
-
+        /// <summary>
+        /// Start buton click event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void MenuItem_Start_Click(object sender, RoutedEventArgs e)
         {
             if ((_connectionThread.ThreadState == System.Threading.ThreadState.Unstarted) | (_connectionThread.ThreadState == System.Threading.ThreadState.Stopped))
             {
                 _connectionThread.Start();
-
             }
-            
-            ethernetConnectWaitHandle.Set();
+            _ethernetConnectWaitHandle.Set();
             //historyDataBaseSetup();
-            comSetup1.SetComboBoxDefault();
-            //  comSetup1.openComm();                     //Removed for etherent testing
-           // dataGridView1.ItemsSource = allLists.allTagList;
-           // dataGridView1.AutoGenerateColumns = true;
+            _comSetup1.SetComboBoxDefault();
+            //comSetup1.openComm();                     //Removed for etherent testing
+            //dataGridView1.ItemsSource = allLists.allTagList;
+            //dataGridView1.AutoGenerateColumns = true;
             //dataGridView1.DataContext = allLists.allTagList;
-          
             //DataContext = allLists;
             DataContext = EthernetConnection.allLists;                             //static
-
             MenuStop.IsEnabled = true;
             MenuStart.IsEnabled = false;
-            timerTree.Start();
+            _timerTree.Start();
             setUpGridViewOrder();
-
-
         }
-
+        /// <summary>
+        /// Loads user config for all Tab Positions and Widths
+        /// </summary>
         private void setUpGridViewOrder()
         {
             foreach (var col in dataGridView1.Columns)
             {
-
-
                 switch (col.Header.ToString())
                 {
+                    case "lowVolt":
+                        col.Visibility = System.Windows.Visibility.Hidden;
+                        break;
                     case "TTL":
                         col.DisplayIndex = Properties.Settings.Default.TTLwidth;
                         col.Width = Properties.Settings.Default.TTLindex;
@@ -370,8 +418,9 @@ namespace WpfApplication1
                         col.Width = Properties.Settings.Default.BrSequWidth;
                         break;
                     case "BrSequPersist":
-                        col.DisplayIndex = Properties.Settings.Default.BrSequPersistInt;
-                        col.Width = Properties.Settings.Default.BrSequPersistWidth;
+                        col.Visibility = System.Windows.Visibility.Hidden;
+                        //col.DisplayIndex = Properties.Settings.Default.BrSequPersistInt;
+                        //col.Width = Properties.Settings.Default.BrSequPersistWidth;
                         break;
                     case "BrCmd":
                         col.DisplayIndex = Properties.Settings.Default.BrCmdIndex;
@@ -423,116 +472,142 @@ namespace WpfApplication1
                         col.Width = Properties.Settings.Default.RxLQIWidth;
                         break;
                     case "CH4gas":
-                        col.DisplayIndex = Properties.Settings.Default.CH4gasIndex;
-                        col.Width = Properties.Settings.Default.CH4gasWidth;
+                        col.Visibility = System.Windows.Visibility.Hidden;
+                        //col.DisplayIndex = Properties.Settings.Default.CH4gasIndex;
+                        //col.Width = Properties.Settings.Default.CH4gasWidth;
                         break;
                     case "COgas":
-                        col.DisplayIndex = Properties.Settings.Default.COgasIndex;
-                        col.Width = Properties.Settings.Default.COgasWidth;
+                        col.Visibility = System.Windows.Visibility.Hidden;
+                        //col.DisplayIndex = Properties.Settings.Default.COgasIndex;
+                        //col.Width = Properties.Settings.Default.COgasWidth;
                         break;
                     case "O2gas":
-                        col.DisplayIndex = Properties.Settings.Default.O2gasIndex;
-                        col.Width = Properties.Settings.Default.O2gasWidth;
+                        col.Visibility = System.Windows.Visibility.Hidden;
+                        //col.DisplayIndex = Properties.Settings.Default.O2gasIndex;
+                        //col.Width = Properties.Settings.Default.O2gasWidth;
                         break;
                     case "CO2gas":
-                        col.DisplayIndex = Properties.Settings.Default.CO2gasIndex;
-                        col.Width = Properties.Settings.Default.CO2gasWidth;
+                        col.Visibility = System.Windows.Visibility.Hidden;
+                        //col.DisplayIndex = Properties.Settings.Default.CO2gasIndex;
+                        //col.Width = Properties.Settings.Default.CO2gasWidth;
                         break;
                     case "failState":
-                        col.DisplayIndex = Properties.Settings.Default.failStateIndex;
-                        col.Width = Properties.Settings.Default.failStateWidth;
+                        col.Visibility = System.Windows.Visibility.Hidden;
+                        //col.DisplayIndex = Properties.Settings.Default.failStateIndex;
+                        //col.Width = Properties.Settings.Default.failStateWidth;
                         break;
                     case "u57":
-                        col.DisplayIndex = Properties.Settings.Default.u57Index;
-                        col.Width = Properties.Settings.Default.u57Width;
+                        col.Visibility = System.Windows.Visibility.Hidden;
+                        //col.DisplayIndex = Properties.Settings.Default.u57Index;
+                        //col.Width = Properties.Settings.Default.u57Width;
                         break;
                     case "u54":
-                        col.DisplayIndex = Properties.Settings.Default.u54Index;
-                        col.Width = Properties.Settings.Default.u54Width;
+                        col.Visibility = System.Windows.Visibility.Hidden;
+                        //col.DisplayIndex = Properties.Settings.Default.u54Index;
+                        //col.Width = Properties.Settings.Default.u54Width;
                         break;
                     case "u55":
-                        col.DisplayIndex = Properties.Settings.Default.u55Index;
-                        col.Width = Properties.Settings.Default.u55Width;
+                        col.Visibility = System.Windows.Visibility.Hidden;
+                        //col.DisplayIndex = Properties.Settings.Default.u55Index;
+                        //col.Width = Properties.Settings.Default.u55Width;
                         break;
                     case "u56":
-                        col.DisplayIndex = Properties.Settings.Default.u56Index;
-                        col.Width = Properties.Settings.Default.u56Width;
+                        col.Visibility = System.Windows.Visibility.Hidden;
+                        //col.DisplayIndex = Properties.Settings.Default.u56Index;
+                        //col.Width = Properties.Settings.Default.u56Width;
                         break;
                     case "u58":
-                        col.DisplayIndex = Properties.Settings.Default.u58Index;
-                        col.Width = Properties.Settings.Default.u58Width;
+                        col.Visibility = System.Windows.Visibility.Hidden;
+                        //col.DisplayIndex = Properties.Settings.Default.u58Index;
+                        //col.Width = Properties.Settings.Default.u58Width;
                         break;
                     case "switchState":
-                        col.DisplayIndex = Properties.Settings.Default.switchStateIndex;
-                        col.Width = Properties.Settings.Default.switchStateWidth;
+                        col.Visibility = System.Windows.Visibility.Hidden;
+                        //col.DisplayIndex = Properties.Settings.Default.switchStateIndex;
+                        //col.Width = Properties.Settings.Default.switchStateWidth;
                         break;
                     case "Image":
+                        //Visibility = System.Windows.Visibility.Hidden;
                         col.DisplayIndex = Properties.Settings.Default.ImageIndex;
                         col.Width = Properties.Settings.Default.ImageWidth;
                         break;
                     case "remoteLockout":
-                        col.DisplayIndex = Properties.Settings.Default.remoteLockoutIndex;
-                        col.Width = Properties.Settings.Default.remoteLockoutWidth;
+                        col.Visibility = System.Windows.Visibility.Hidden;
+                        ////col.DisplayIndex = Properties.Settings.Default.remoteLockoutIndex;
+                        ////col.Width = Properties.Settings.Default.remoteLockoutWidth;
                         break;
                     case "keyShort":
-                        col.DisplayIndex = Properties.Settings.Default.keyShortIndex;
-                        col.Width = Properties.Settings.Default.keyShortWidth;
+                        col.Visibility = System.Windows.Visibility.Hidden;
+                        //col.DisplayIndex = Properties.Settings.Default.keyShortIndex;
+                        //col.Width = Properties.Settings.Default.keyShortWidth;
                         break;
                     case "switchError":
-                        col.DisplayIndex = Properties.Settings.Default.switchErrorIndex;
-                        col.Width = Properties.Settings.Default.switchErrorWidth;
+                        col.Visibility = System.Windows.Visibility.Hidden;
+                        //col.DisplayIndex = Properties.Settings.Default.switchErrorIndex;
+                        //col.Width = Properties.Settings.Default.switchErrorWidth;
                         break;
                     case "RLO_Error":
-                        col.DisplayIndex = Properties.Settings.Default.RLO_ErrorIndex;
-                        col.Width = Properties.Settings.Default.RLO_ErrorWidth;
+                        col.Visibility = System.Windows.Visibility.Hidden;
+                        //col.DisplayIndex = Properties.Settings.Default.RLO_ErrorIndex;
+                        //col.Width = Properties.Settings.Default.RLO_ErrorWidth;
                         break;
                     case "dcVoltsState":
-                        col.DisplayIndex = Properties.Settings.Default.dcVoltsStateIndex;
-                        col.Width = Properties.Settings.Default.dcVoltsStateWidth;
+                        col.Visibility = System.Windows.Visibility.Hidden;
+                        //col.DisplayIndex = Properties.Settings.Default.dcVoltsStateIndex;
+                        //col.Width = Properties.Settings.Default.dcVoltsStateWidth;
                         break;
                     case "adcReadError1":
-                        col.DisplayIndex = Properties.Settings.Default.adcReadError1Index;
-                        col.Width = Properties.Settings.Default.adcReadError1Width;
+                        col.Visibility = System.Windows.Visibility.Hidden;
+                        //col.DisplayIndex = Properties.Settings.Default.adcReadError1Index;
+                        //col.Width = Properties.Settings.Default.adcReadError1Width;
                         break;
                     case "adcReadError2":
-                        col.DisplayIndex = Properties.Settings.Default.adcReadError2Index;
-                        col.Width = Properties.Settings.Default.adcReadError2Width;
+                        col.Visibility = System.Windows.Visibility.Hidden;
+                        //col.DisplayIndex = Properties.Settings.Default.adcReadError2Index;
+                        //col.Width = Properties.Settings.Default.adcReadError2Width;
+                        break;
+                    case "s57":
+                        col.Visibility = System.Windows.Visibility.Hidden;
+                       
                         break;
                 }
 
 
             }
         }
-
-
-
+        /// <summary>
+        /// Stop Button click event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public void MenuItem_Stop_Click(object sender, RoutedEventArgs e)
         {
-            ethernetConnectWaitHandle.Reset();
-            foreach (KeyValuePair<string, EthernetConnection> ethCon in _myEthConnList)
+            _ethernetConnectWaitHandle.Reset();
+            foreach (KeyValuePair<string, EthernetConnection> ethCon in EthernetConnection._myEthConnList)
             {
                 ethCon.Value.EthernetAbort();                    
             }
-
-            if (comSetup1.comport.IsOpen) comSetup1.comport.Close();
-
+            if (_comSetup1.comport.IsOpen) _comSetup1.comport.Close();
             MenuStart.IsEnabled = true;
             MenuStop.IsEnabled = false;
-            timerTree.Stop();
-            foreach (KeyValuePair<string, EthernetConnection> ethCon in _myEthConnList)
+            _timerTree.Stop();
+            foreach (KeyValuePair<string, EthernetConnection> ethCon in EthernetConnection._myEthConnList)
             {
                 ethCon.Value.EthernetAbort();     
             }
-            _myEthConnList.Clear();
+            EthernetConnection._myEthConnList.Clear();
             //allLists.workingTagQueue0.Clear();
             EthernetConnection.allLists.workingTagQueue0.Clear();
-
             // allLists.myTagReaderList.Clear();
         }
-
+        /// <summary>
+        /// Database button click event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void MenuItem_DataBase_Click(object sender, RoutedEventArgs e)
         {
-            dataBaseSetup1.Show();
+            _dataBaseSetup1.Show();
         }
 
         public void subscribe(ComSetup c)
@@ -545,10 +620,9 @@ namespace WpfApplication1
             o.SendDataEvent += new Message.SendDataHandler(o_SendDataEvent);
         }
 
-
         void o_SendDataEvent(byte[] message)
         {
-            foreach (KeyValuePair<string, EthernetConnection> ethCon in _myEthConnList)
+            foreach (KeyValuePair<string, EthernetConnection> ethCon in EthernetConnection._myEthConnList)
             {
                 int[] frame = new int[3 + message.Length];
                 int i = 0;
@@ -569,79 +643,74 @@ namespace WpfApplication1
             MenuItem_Stop_Click(this, null);
         }
 
-
-        private void treeView1_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            var parent = sender as TreeView;
-
-            if (parent.SelectedItem != null)
-            {
-                var children = parent.SelectedItem as TreeTag;  //TreeViewItem;
-                string MAC = children.Name;
-
-                messageWindow1.textBox1.Text = MAC.Insert(8, ":");
-                messageWindow1.Show();
-                StatusText.Text = "Message window opened";
-            }
-            else
-            {
-                StatusText.Text = "No item selected - Left click to select item";
-            }
-        }
-
+        /// <summary>
+        /// Button click event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void MenuItem_Message_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                messageWindow1.Show();
+                _messageWindow1.Show();
             }
             catch
             {
-                messageWindow1 = new Message(ref EthernetConnection.allLists);
-                subscribe2(messageWindow1);
-                messageWindow1.Show();
+                _messageWindow1 = new Message(ref EthernetConnection.allLists);
+                subscribe2(_messageWindow1);
+                _messageWindow1.Show();
             }
         }
-
+        /// <summary>
+        /// Red cross click to exit event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Window_Closed(object sender, EventArgs e)
         {
             ExitApplication();
         }
-
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Button click event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void NamesForm_Click(object sender, RoutedEventArgs e)
         {
-            minersNamesForm.Show();
+            _minersNamesForm.Show();
         }
-
-        private void MenuItem_Click_1(object sender, RoutedEventArgs e)
+        private void LoadConfig_Click(object sender, RoutedEventArgs e)
         {
             LoadConfig();
         }
 
+        /// <summary>
+        /// Displays Load config dialog
+        /// </summary>
         private void LoadConfig()
         {
             string filename = null;
-            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+            System.Windows.Forms.OpenFileDialog dlg = new  System.Windows.Forms.OpenFileDialog(); // Microsoft.Win32.OpenFileDialog();
             dlg.FileName = "Names.ddb";
             dlg.DefaultExt = ".ddb";
             dlg.Filter = "(.ddb)|*.ddb";
-            //Show save dlg
-            Nullable<bool> result = dlg.ShowDialog();
-            // Process save file dialog box results
-            if (result == true)
+            dlg.Title = "Open WiPAN config, Davis Derby Ltd";
+            System.Windows.Forms.DialogResult result = dlg.ShowDialog();
+            if (result == System.Windows.Forms.DialogResult.OK)
             {
-                // Save document
                 filename = dlg.FileName;
             }
             if ((filename != "") & (filename != null))
             {
-                FileClass.LoadMapXml(filename, ref comSetup1, ref minersNamesForm);
+                FileClass.LoadMapXml(filename, ref _comSetup1, ref _minersNamesForm);
             }
         }
-
-       
-
-        private void MenuItem_Click_2(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Save config click event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SaveConfig_Click(object sender, RoutedEventArgs e)
         {
             SaveConfig();
         }
@@ -848,118 +917,131 @@ namespace WpfApplication1
             }
         }
 
+        /// <summary>
+        /// Displays save config dialog
+        /// </summary>
         private void SaveConfig()
         {
             string filename = null;
-            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+            System.Windows.Forms.SaveFileDialog dlg = new System.Windows.Forms.SaveFileDialog();
             dlg.FileName = "Names.ddb";
             dlg.DefaultExt = ".ddb";
             dlg.Filter = "(.ddb)|*.ddb";
-            //Show save dlg
-            Nullable<bool> result = dlg.ShowDialog();
-            // Process save file dialog box results
-            if (result == true)
+            dlg.Title = "Save WiPAN config, Davis Derby Ltd";
+            System.Windows.Forms.DialogResult result = dlg.ShowDialog();
+            if (result == System.Windows.Forms.DialogResult.OK)
             {
-                // Save document
                 filename = dlg.FileName;
             }
-            FileClass.saveMapXml(filename, ref comSetup1, ref minersNamesForm);
+            FileClass.saveMapXml(filename, ref _comSetup1, ref _minersNamesForm);
         }
-
-      
-
+        /// <summary>
+        /// Clear button click event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void MenuClear_Click(object sender, RoutedEventArgs e)
         {
             EthernetConnection.allLists.allTagList.Clear();
         }
-
-
-
+        /// <summary>
+        /// checks for button clicks events in data grid cells
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void DataGrid_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-
-            int col = dataGridPullkey.CurrentCell.Column.DisplayIndex;
-            string colName = dataGridPullkey.Columns[col].Header.ToString();
-
+            DataGrid temp = sender as DataGrid;
+            int col = temp.CurrentCell.Column.DisplayIndex;
+            string colName = temp.CurrentCell.Column.Header.ToString();
             if (colName == "remoteLockout")
-            {
-                               
+            {             
                 int row = dataGridPullkey.SelectedIndex;
                 if (EthernetConnection.allLists.allTagList[row].remoteLockout == false)
                 {
-                    messageWindow1.addMessageToTxQueue(EthernetConnection.allLists.allTagList[row].zoneID, EthernetConnection.allLists.allTagList[row].unitID, 0x55, 0x01);
+                    _messageWindow1.addMessageToTxQueue(EthernetConnection.allLists.allTagList[row].zoneID, EthernetConnection.allLists.allTagList[row].unitID, 0x55, 0x01);
                 }
                 else
                 {
-                    messageWindow1.addMessageToTxQueue(EthernetConnection.allLists.allTagList[row].zoneID, EthernetConnection.allLists.allTagList[row].unitID, 0x55, 0x00);
+                    _messageWindow1.addMessageToTxQueue(EthernetConnection.allLists.allTagList[row].zoneID, EthernetConnection.allLists.allTagList[row].unitID, 0x55, 0x00);
                 }
             }
+            if (colName == "minersName")
+            {
+                _minersNamesForm.Show();
+            }
         }
-
-        private void MenuItem_Click_5(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Coord Setup click event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void coordSetup_Click(object sender, RoutedEventArgs e)
         {
             CoordSetup coordSetup = new CoordSetup();
             coordSetup.Show();
         }
 
-        private void TabItem_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            using (StreamReader w = new StreamReader("debugLog.txt"))
-            {
-                string line;
-                while ((line = w.ReadLine()) != null)
-                {
-                    consoleText.AppendText(line); // Write to console.
-                }
-                w.Close();
-                w.Dispose();
-
-
-            }
-
-        }
-
+        /// <summary>
+        /// TabItem click event
+        /// Makes changes based on which tab is clicked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void TabItem_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            updatConsoleText();
+            TabItem temp = sender as TabItem;
+            if (temp.Header.ToString() == "Console")
+            {
+                MenuClearLog.Visibility = System.Windows.Visibility.Visible;
+                updatConsoleText();
+            }
+            else
+            {
+                MenuClearLog.Visibility = System.Windows.Visibility.Hidden;
+            }
+            
         }
 
+        /// <summary>
+        /// Reloads debugLog to console text box
+        /// </summary>
         private void updatConsoleText()
         {
             try
             {
-                consoleText.Clear();
-                using (StreamReader w = new StreamReader("debugLog.txt"))
+                if ((File.GetAttributes("debugLog.txt") & FileAttributes.Archive) == FileAttributes.Archive)
                 {
-                    string line;
-                    while ((line = w.ReadLine()) != null)
+                    consoleText.Clear();
+                    using (StreamReader w = new StreamReader("debugLog.txt"))
                     {
-                        consoleText.AppendText("\n");
-                        consoleText.AppendText(line); // Write to console.
+                        string line;
+                        while ((line = w.ReadLine()) != null)
+                        {
+                            consoleText.AppendText("\n");
+                            consoleText.AppendText(line); // Write to console.
+                        }
+                        w.Close();
+                        w.Dispose();
+
+
                     }
-                    w.Close();
-                    w.Dispose();
-
-
+                    File.SetAttributes("debugLog.txt", File.GetAttributes("debugLog.txt") & ~FileAttributes.Archive);
                 }
+                else 
+                {
+                }
+
+               
             }
             catch
             { }
 
         }
+         
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            consoleText.Clear();
-            using (FileStream stream = new FileStream("debugLog.txt", FileMode.Create)) 
-            using (TextWriter writer = new StreamWriter(stream))
-            {
-                writer.WriteLine("");
-            }
 
-        }
-
-        private void consoleText_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        private void MenuClearLog_Click(object sender, RoutedEventArgs e)
         {
             consoleText.Clear();
             using (FileStream stream = new FileStream("debugLog.txt", FileMode.Create))
@@ -969,10 +1051,7 @@ namespace WpfApplication1
             }
         }
 
-        private void MenuItem_Click_3(object sender, RoutedEventArgs e)
-        {
-
-        }
+       
 
     }
 }
