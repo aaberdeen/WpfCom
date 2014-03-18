@@ -16,7 +16,7 @@ namespace WpfApplication1
     /// </summary>
     public partial class ComSetup : Window
     {
-        public BindingList<coodData> coordIpList = new BindingList<coodData>(); 
+       // public BindingList<coodData> coordIpList = new BindingList<coodData>(); 
 
         //public int BaudRate { get; set; }
         //public int DataBits { get; set; }
@@ -49,7 +49,7 @@ namespace WpfApplication1
             SetComboBoxDefault();
             createCoordTable();
 
-            CoodTable.ItemsSource = coordIpList;
+            CoodTable.ItemsSource = EthernetConnection.allLists.coordinators;
 
 
         }
@@ -361,8 +361,8 @@ namespace WpfApplication1
             //Properties.Settings.Default.CoordServer = coordIpList[0].IP;
             //Properties.Settings.Default.CoordPort = coordIpList[0].port;
             //Properties.Settings.Default.Save();
-            List<coodData> toRemove = new List<coodData>();
-            foreach (coodData entry in coordIpList)
+            List<Coordinators> toRemove = new List<Coordinators>();
+            foreach (Coordinators entry in EthernetConnection.allLists.coordinators)
             {
                 
                 if (Usefull.ValidIP(entry.IP) == false)
@@ -374,9 +374,9 @@ namespace WpfApplication1
            
             }
 
-            foreach (coodData a in toRemove)
+            foreach (Coordinators a in toRemove)
             {
-                coordIpList.Remove(a);
+                EthernetConnection.allLists.coordinators.Remove(a);
             }
 
             this.Hide();
@@ -395,7 +395,7 @@ namespace WpfApplication1
         {
            int getIndex = 0;
 
-            foreach (coodData data in coordIpList)
+           foreach (Coordinators data in EthernetConnection.allLists.coordinators)
             {
                 if (data.Index > getIndex)
                 {
@@ -403,17 +403,17 @@ namespace WpfApplication1
                 }
             }
             string udpPort = Convert.ToString(4444 + getIndex);
-            coordIpList.Add(new coodData("xxx.xxx.xxx.xxx", "40", false, (getIndex + 1), "xxx.xxx.xxx.xxx", udpPort));
+            EthernetConnection.allLists.coordinators.Add(new Coordinators("xxx.xxx.xxx.xxx", "40", false, (getIndex + 1), "xxx.xxx.xxx.xxx", udpPort));
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            coodData selected = (coodData)CoodTable.SelectedItem;
+            Coordinators selected = (Coordinators)CoodTable.SelectedItem;
             int selectedIndex = CoodTable.SelectedIndex;
 
             if(selected!=null)
             {
-            coordIpList.Remove(selected);
+                EthernetConnection.allLists.coordinators.Remove(selected);
 
             if (selectedIndex+1 > CoodTable.Items.Count)
             {
@@ -434,7 +434,7 @@ namespace WpfApplication1
 
 
     }
-    public class coodData : INotifyPropertyChanged
+    public class Coordinators : INotifyPropertyChanged
     {
         private int _Index;
         private string _IP;
@@ -447,7 +447,7 @@ namespace WpfApplication1
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public coodData(string ipIn, string portIn, bool connectedIn,int index, string localIPin, string udpPortIn)
+        public Coordinators(string ipIn, string portIn, bool connectedIn,int index, string localIPin, string udpPortIn)
         {
             this.IP = ipIn;
             this.TCPport = portIn;

@@ -9,7 +9,7 @@ namespace WpfApplication1
 {
     public partial class Lists
     {
-        List<Reader> myReaderList = new List<Reader>();
+        
         /// <summary>
         /// TreeView Binding List
         /// </summary>
@@ -24,8 +24,12 @@ namespace WpfApplication1
        // public BindingList<TagBind> allTagList = new BindingList<TagBind>();     //changed to binding list for Datagridview binding
 
         //public CollectionViewSource ViewSource { get; set; } //this is for sorting function
+        public BindingList<EndPoints> endPoints = new BindingList<EndPoints>();  //list of all endpoints used by minersNames Form
+        public BindingList<Coordinators> coordinators = new BindingList<Coordinators>(); //list of all coordinators
+        public List<Sightings> sightings = new List<Sightings>(); // list of tag sightings with routers
+        List<Routers> routers = new List<Routers>();
 
-        public MySortableBindingList<TagBind> allTagList { get; private set; }
+        public MySortableBindingList<TagBind> allTagList { get; private set; } // list of all tag pings 
 
        // public ICollectionView Customers { get;  set; }
        // public MyCollectionView GroupedCustomers{get;set;}

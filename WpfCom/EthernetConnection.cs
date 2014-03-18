@@ -67,9 +67,9 @@ namespace WpfApplication1
         public static Lists allLists = new Lists();
         private static DispatcherTimer _etherTickTimer = new DispatcherTimer();
         public static ConcurrentDictionary<string, EthernetConnection> _myEthConnList = new ConcurrentDictionary<string, EthernetConnection>();
-        private coodData _coordData;
+        private Coordinators _coordData;
 
-         public EthernetConnection(coodData coordData, ref ComSetup com, ref MinersNamesForm MNform, ref DataBaseSetup DBsetup, bool DBcon, int index, ref Message messageWindow1)
+         public EthernetConnection(Coordinators coordData, ref ComSetup com, ref MinersNamesForm MNform, ref DataBaseSetup DBsetup, bool DBcon, int index, ref Message messageWindow1)
         {
             _com = com;
             _MNform = MNform;
@@ -92,7 +92,7 @@ namespace WpfApplication1
             {
                 if (TCPinit())                        //(tcpClient.Connected)
                 {
-                    _com.coordIpList[_index].connected = true;
+                    allLists.coordinators[_index].connected = true;
                     // this is in the try because we don't want to start the treads without the TCP connecton
                     ThreadInit();
                     UDPInit();
@@ -100,7 +100,7 @@ namespace WpfApplication1
             }
             catch(Exception e)
             {
-                _com.coordIpList[_index].connected = false;
+                EthernetConnection.allLists.coordinators[_index].connected = false;
                 _errorLog.write(e, "EthernetConnection Init");
             }
         }
@@ -646,9 +646,9 @@ namespace WpfApplication1
         /// <param name="tag"></param>
         private void ExtractData(Tag tag)
         {
-            string[] minersName = _MNform.addMacToMinersNames(tag.TagAdd);
-            tag.Name = minersName[0];
-            tag.endPointType = minersName[1];
+            string[] endPoint = _MNform.addMacToEndpointList(tag.TagAdd);
+            tag.Name = endPoint[0];
+            tag.endPointType = endPoint[1];
             if (tag.BrSequ != 0)
             {
                 allLists.brSequReciveQueue.Enqueue(tag.BrSequ);
@@ -680,26 +680,10 @@ namespace WpfApplication1
                 i++;
             }
             s1.Stop();
-            const int _max = 100000000;
             Debug.WriteLine(((double)(s1.Elapsed.TotalMilliseconds)).ToString("0.0000 ms"));
 
             if (tagIndex == -1) // not in list
             {
-               // _errorLog.write("----------");
-                //foreach (TagBind tb in allLists.allTagList)
-                //{
-                //    if (tb.TagAdd == tag.TagAdd)
-                //    {
-                //        if (tb.ReaderAdd == tag.ReaderAdd)
-                //        {
-                //        _errorLog.write(string.Format("Duplicate entry  List.tag {0}, list.reader {1}, new.tag {2}, new.reader {3}", tb.TagAdd, tb.ReaderAdd,tag.TagAdd,tag.ReaderAdd));
-                //        }
-                //    }
-
-                    
-                //}
-                //_errorLog.write("----------");
-
                 int listSize = allLists.allTagList.Count();
                 upDateAllTagList(tag); // this in turn updates the gridView
                 if (checkListHasGrown(listSize))
@@ -826,7 +810,7 @@ namespace WpfApplication1
         {
             try
             {
-                _com.coordIpList[_index].connected = false;
+                allLists.coordinators[_index].connected = false;
             }
             catch
             {
@@ -839,8 +823,15 @@ namespace WpfApplication1
             {
                 _udPclient.Close();
             }
-            System.Media.SoundPlayer player = new System.Media.SoundPlayer("Warning Siren.wav");
-            player.Play();
+            try
+            {
+                System.Media.SoundPlayer player = new System.Media.SoundPlayer(Properties.Resources.Warning_Siren);
+                player.Play();
+            }
+            catch (Exception e)
+            {
+                _errorLog.write(e.ToString());
+            }
         }
 
         /// <summary>

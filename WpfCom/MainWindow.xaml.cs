@@ -22,7 +22,7 @@ namespace WpfApplication1
 
     public partial class MainWindow : Window
     {
-        private Thread _splashThread;      
+       // private Thread _splashThread;      
         private errorLog _errorLog = new errorLog();
        // private static ConcurrentDictionary<string, EthernetConnection> _myEthConnList = new ConcurrentDictionary<string, EthernetConnection>();
         private Thread _connectionThread;
@@ -85,13 +85,13 @@ namespace WpfApplication1
             while (!_shouldStopConnectionThread)
             {
                 _ethernetConnectWaitHandle.WaitOne(); // blocks thread untill signall is recived 
-                foreach (coodData conn in _comSetup1.coordIpList)
+                foreach (Coordinators conn in EthernetConnection.allLists.coordinators)
                 {
                     if (!_shouldStopConnectionThread)
                     {
                         if (!conn.connected)
                         {
-                            int getIndex = _comSetup1.coordIpList.IndexOf(conn);
+                            int getIndex = EthernetConnection.allLists.coordinators.IndexOf(conn);
                             //try reconnect
                            // etherConnect(conn.IP, conn.localIP, conn.udpPort, conn.port, getIndex);
                             etherConnect(conn, getIndex);
@@ -227,7 +227,7 @@ namespace WpfApplication1
         /// </summary>
         /// <param name="server"></param>
         /// <param name="port"></param>
-        public void etherConnect(coodData coord, int index)
+        public void etherConnect(Coordinators coord, int index)
         {
             if (Usefull.ValidIP(coord.IP))
             {
@@ -254,7 +254,7 @@ namespace WpfApplication1
                             }
                             else
                             {
-                                _comSetup1.coordIpList[index].connected = true;
+                                EthernetConnection.allLists.coordinators[index].connected = true;
                             }
                         }
                         else //no client so cant be connected
@@ -271,7 +271,7 @@ namespace WpfApplication1
                 }
                 catch (SocketException e)
                 {
-                    _comSetup1.coordIpList[index].connected = false;
+                    EthernetConnection.allLists.coordinators[index].connected = false;
                     _errorLog.write(e, "MainWindow etherConnect");
                 }
             }
@@ -702,7 +702,7 @@ namespace WpfApplication1
             }
             if ((filename != "") & (filename != null))
             {
-                FileClass.LoadMapXml(filename, ref _comSetup1, ref _minersNamesForm);
+                FileClass.LoadMapXml(filename);
             }
         }
         /// <summary>
@@ -933,7 +933,7 @@ namespace WpfApplication1
             {
                 filename = dlg.FileName;
             }
-            FileClass.saveMapXml(filename, ref _comSetup1, ref _minersNamesForm);
+            FileClass.saveMapXml(filename);
         }
         /// <summary>
         /// Clear button click event

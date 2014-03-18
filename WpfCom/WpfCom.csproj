@@ -30,14 +30,14 @@
     <UpdateUrl>\\mining\J\SOFT\WiPAN\Publish\WpfCom\</UpdateUrl>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>96</ApplicationRevision>
+    <ApplicationRevision>102</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -47,9 +47,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
+    <Optimize>false</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -108,6 +108,7 @@
     <Compile Include="FileClass.cs" />
     <Compile Include="GetMac.cs" />
     <Compile Include="MyCollectionView.cs" />
+    <Compile Include="Sightings.cs" />
     <Compile Include="UdpState.cs" />
     <Compile Include="Usefull.cs" />
     <Compile Include="Lists.cs" />
@@ -116,7 +117,7 @@
       <DependentUpon>SplashWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="WiPANmessages.cs" />
-    <Page Include="ComSetup.xaml">
+    <Page Include="Coordinators.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -132,8 +133,8 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ComSetup.xaml.cs">
-      <DependentUpon>ComSetup.xaml</DependentUpon>
+    <Compile Include="Coordinators.xaml.cs">
+      <DependentUpon>Coordinators.xaml</DependentUpon>
     </Compile>
     <Compile Include="DataBaseSetup.xaml.cs">
       <DependentUpon>DataBaseSetup.xaml</DependentUpon>
@@ -141,10 +142,10 @@
     <Compile Include="Message.xaml.cs">
       <DependentUpon>Message.xaml</DependentUpon>
     </Compile>
-    <Compile Include="MinerNames.xaml.cs">
-      <DependentUpon>MinerNames.xaml</DependentUpon>
+    <Compile Include="EndPoints.xaml.cs">
+      <DependentUpon>EndPoints.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Reader.cs" />
+    <Compile Include="Routers.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Tag.cs" />
     <Compile Include="TagBind.cs" />
@@ -157,7 +158,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="MinerNames.xaml">
+    <Page Include="EndPoints.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -211,9 +212,10 @@
     <EmbeddedResource Include="debugLog.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="Warning Siren.wav">
+    <Resource Include="Warning_Siren.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
+    </Resource>
+    <None Include="Resources\Warning Siren.wav" />
     <Content Include="wpanSchema.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

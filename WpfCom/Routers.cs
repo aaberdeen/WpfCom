@@ -10,16 +10,13 @@ using System.Timers;
 
 namespace WpfApplication1
 {
-    
-    
     public class Node :INotifyPropertyChanged
     {
         private errorLog _errorLog = new errorLog();
         private string _name = "";
         private string _endPointType = "";
         BindingList<Node> _Children = null;
-        private int _TTL = 5;
-             
+        private int _TTL = 5;            
         private int _PktLength;
         private int _PktSequence;
         //private int _PktEvent;
@@ -39,32 +36,8 @@ namespace WpfApplication1
         private string _readerAddress;
         //private int _RxLQI;
         //private static Timer _TickTimer= new Timer(10000);
-
+        private DateTime _timeSeen;
         public event PropertyChangedEventHandler PropertyChanged;
-
-    
-        
-        
-        
-        public Node()
-        {
-
-            //_TickTimer.Elapsed += new ElapsedEventHandler(TickTimer);
-            //_TickTimer.Enabled = true;
-        }
-        
-        public Node(string name, BindingList<Node> Children)
-        {
-
-            _name = name;
-            _Children = Children;
-
-            //_TickTimer.Elapsed += new ElapsedEventHandler(TickTimer);
-            //_TickTimer.Enabled = true;
-        }
-
-
-
 
 
         #region Properties
@@ -171,15 +144,9 @@ namespace WpfApplication1
         #endregion
         private void NotifyPropertyChanged(string name)
         {
-
-
             if (PropertyChanged != null)
                 PropertyChanged(this, new PropertyChangedEventArgs(name));
-
-
-        }
-
-   
+        }   
     }
 
 
@@ -197,9 +164,15 @@ namespace WpfApplication1
         public string Display { get; set; }
     }
       
-    class Reader                       
+    class Routers                       
     {
-        public string ReaderAdd { get; set; }
+        public string routerMac { get; set; }
+        public string routerName { get; set; }
+        public int Xpos { get; set; }
+        public int Ypos { get; set; }
+        public int Zpos { get; set; }
+        public int ZoneID { get; set; }
+        public bool Online { get; set; }
 
         public List<Tag> myTagList { get; set; }        //list of tags 
         
@@ -240,27 +213,7 @@ namespace WpfApplication1
         {
             myTagList.Remove(TagItem);
         }
-
-      
-
-        /// <summary>
-        /// Method to decrement TTL in Router List
-        /// </summary>
-        /// <param name="TagAddTemp"></param>
-
-        public void DecTTL(string TagAddTemp)
-        {
-            Tag result = FindTag(TagAddTemp);
-            if (result.TTL != 0)
-            {
-                result.TTL--;
-            }
-
-
-
-        }
-
-
+     
 
         /// <summary>
         /// Method to find tag in router list

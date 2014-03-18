@@ -5,14 +5,14 @@ namespace WpfApplication1
 {
     public class FileClass
     {
-        public static void LoadMapXml(string filename, ref ComSetup comSetup1, ref MinersNamesForm minersNamesForm)
+        public static void LoadMapXml(string filename)
         {
-            comSetup1.coordIpList.Clear();
+            EthernetConnection.allLists.coordinators.Clear();
 
             XmlDocument map = new XmlDocument();
             map.Load(filename);
 
-            minersNamesForm.minerNames.Clear();
+            EthernetConnection.allLists.endPoints.Clear();
             // listToReturn.Clear();
 
             foreach (XmlNode node in map.DocumentElement.SelectSingleNode("/root"))
@@ -61,7 +61,7 @@ namespace WpfApplication1
 
                         if (IP != "")
                         {
-                            comSetup1.coordIpList.Add(new coodData(IP, port, false, index, localIP, udpport));
+                            EthernetConnection.allLists.coordinators.Add(new Coordinators(IP, port, false, index, localIP, udpport));
                         }
 
                     }
@@ -143,7 +143,7 @@ namespace WpfApplication1
 
                         if (minerMAC != null)
                         {
-                            minersNamesForm.minerNames.Add(new NamesBind(minerMAC, minerName, endPointType));
+                            EthernetConnection.allLists.endPoints.Add(new EndPoints(minerMAC, minerName, endPointType));
                         }
                     }
 
@@ -156,7 +156,7 @@ namespace WpfApplication1
 
         }
 
-        public static void saveMapXml(string fileName, ref ComSetup comSetup1, ref MinersNamesForm minersNamesForm)
+        public static void saveMapXml(string fileName)
         {
             // Create the XmlDocument.
             XmlDocument doc = new XmlDocument();
@@ -192,7 +192,7 @@ namespace WpfApplication1
             data.InnerText = Properties.Settings.Default.Password;
             newDatabase.AppendChild(data);
 
-            foreach (coodData connection in comSetup1.coordIpList)
+            foreach (Coordinators connection in EthernetConnection.allLists.coordinators)
             {
                 XmlElement newChild = doc.CreateElement("child");
                 doc.DocumentElement.AppendChild(newChild);
@@ -228,7 +228,7 @@ namespace WpfApplication1
 
             }
 
-            foreach (NamesBind name in minersNamesForm.minerNames)
+            foreach (EndPoints name in EthernetConnection.allLists.endPoints)
             {
                 XmlElement newChild = doc.CreateElement("child");
                 doc.DocumentElement.AppendChild(newChild);
@@ -238,12 +238,12 @@ namespace WpfApplication1
 
                 // Add a MAC address.
                 data = doc.CreateElement("MAC");
-                data.InnerText = name.MAC;
+                data.InnerText = name.endpointMAC;
                 newMiner.AppendChild(data);
 
                 // Add Name
                 data = doc.CreateElement("miner");
-                data.InnerText = name.minerName;
+                data.InnerText = name.endpointName;
                 newMiner.AppendChild(data);
 
                 // Add endPointType

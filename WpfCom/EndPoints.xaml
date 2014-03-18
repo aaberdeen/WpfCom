@@ -1,9 +1,9 @@
 ﻿<Window x:Class="WpfApplication1.MinersNamesForm"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Miners Names" Height="500" Width="500" Closing="Window_Closing">
-    
-    
+        Title="Miners Names" Height="500" Width="579.104" Closing="Window_Closing">
+
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
@@ -15,13 +15,13 @@
             <ColumnDefinition Width="233*"/>
             <ColumnDefinition Width="40"/>
         </Grid.ColumnDefinitions>
-        <DataGrid Name="namesGrd" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="1" Grid.RowSpan="1" Height="310" Width="392" Grid.Column="1" Margin="10,10,0,0">
-                <!--<DataGrid.Columns>
+        <DataGrid Name="namesGrd" Grid.Row="1" Grid.RowSpan="1" Grid.Column="1">
+            <!--<DataGrid.Columns>
                 <DataGridTextColumn Header="Mac Address"/>
                 <DataGridTextColumn Header="Name"/>
             </DataGrid.Columns>-->
         </DataGrid>
-        <Button Content="Close" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Grid.Column="1" Margin="315,40,0,0" Grid.Row="2" Click="Button_Click_1"/>
-        <Button Content="Add New" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Grid.Column="1" Margin="25,40,0,0" Grid.Row="2" Click="Button_Click_2"/>
+        <Button Content="Close" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Grid.Column="1" Margin="315,40,0,0" Grid.Row="2" Click="closeButtonClick"/>
+        <Button Content="Add New" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Grid.Column="1" Margin="25,40,0,0" Grid.Row="2" Click="addNewButtonClick"/>
     </Grid>
 </Window>
