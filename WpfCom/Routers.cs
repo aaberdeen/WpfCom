@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using ComPort;
+//using ComPort;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;

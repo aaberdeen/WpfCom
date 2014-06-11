@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.ComponentModel;
-using ComPort;
+//using ComPort;
 using System.Drawing;
 using System.IO;
 using System.Collections.Specialized;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading;
 using System.Windows;
-using ComPort;
+//using ComPort;
 using System.Linq;
 using SimpleUdpReciever;
 using System.Net;
@@ -28,7 +28,7 @@ namespace WpfApplication1
         private volatile bool _shouldStopSend;
         private volatile bool _shouldStopMain;
         private ComSetup _com;
-        private DBConnect _dbConnect;
+       // private DBConnect _dbConnect;
         private MinersNamesForm _MNform;
         private DataBaseSetup _DBsetup;
         /* NetworkStream that will be used */
@@ -659,7 +659,7 @@ namespace WpfApplication1
             // need to make list of readers and the tags that they have
             if (_DBsetup.trackingEnabled)
             {
-                _dbConnect.trackingDBaseUpDate(tag);          //Adds new tag to DB OR updates tags
+                //_dbConnect.trackingDBaseUpDate(tag);          //Adds new tag to DB OR updates tags
             }
           //  allLists.upDateMyReaderList(tag);  //Update List of readers and there tags :FOR TREEVIEW
            // int tagIndex = allLists.allTagList.ToList().FindIndex(item => (item.TagAdd + item.ReaderAdd) == (tag.TagAdd + tag.ReaderAdd)); // Search for uneque tagAdd+routerAdd 
@@ -742,11 +742,11 @@ namespace WpfApplication1
         {
             if (Properties.Settings.Default.EnableTracking)
             {
-                _dbConnect = new DBConnect(Properties.Settings.Default.Server,
-                                            Properties.Settings.Default.Port,
-                                            Properties.Settings.Default.Database,
-                                            Properties.Settings.Default.UID,
-                                            Properties.Settings.Default.Password); //initialises new db connection
+                //_dbConnect = new DBConnect(Properties.Settings.Default.Server,
+                //                            Properties.Settings.Default.Port,
+                //                            Properties.Settings.Default.Database,
+                //                            Properties.Settings.Default.UID,
+                //                            Properties.Settings.Default.Password); //initialises new db connection
             }
 
         }
@@ -825,8 +825,8 @@ namespace WpfApplication1
             }
             try
             {
-                System.Media.SoundPlayer player = new System.Media.SoundPlayer(Properties.Resources.Warning_Siren);
-                player.Play();
+                //System.Media.SoundPlayer player = new System.Media.SoundPlayer(Properties.Resources.Warning_Siren);
+                //player.Play();
             }
             catch (Exception e)
             {

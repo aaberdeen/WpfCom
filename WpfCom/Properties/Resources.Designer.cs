@@ -59,14 +59,5 @@ namespace WpfApplication1.Properties {
                 resourceCulture = value;
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
-        /// </summary>
-        internal static System.IO.UnmanagedMemoryStream Warning_Siren {
-            get {
-                return ResourceManager.GetStream("Warning_Siren", resourceCulture);
-            }
-        }
     }
 }

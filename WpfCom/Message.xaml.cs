@@ -12,7 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.IO.Ports;
 using System.Windows.Threading;
-using ComPort;
+//using ComPort;
 using System.ComponentModel;
 using System.Windows.Controls.Primitives;
 using System.Threading;
@@ -36,10 +36,14 @@ namespace WpfApplication1
        // DispatcherTimer timerMessage = new DispatcherTimer();
        private BindingList<RxMessageBind> _rxMessageList = new BindingList<RxMessageBind>();
        // public BackgroundWorker backgroundWorkerMessage = new BackgroundWorker();
+        
+         public AutoResetEvent rxMessageWaitHandle;
+        public AutoResetEvent sendMessageWaitHandle;
         private Thread _rxMessages;
         private Thread _txMessage;
-        public AutoResetEvent rxMessageWaitHandle;
-        public AutoResetEvent sendMessageWaitHandle;
+       
+        
+       
         public bool Do_Work;
         private Lists _allLists;
         public volatile bool shouldStopSendMessageThread;
@@ -73,24 +77,27 @@ namespace WpfApplication1
            //// backgroundWorkerMessage.RunWorkerCompleted += BackGroundWorker_RunWorkComplete;
            // backgroundWorkerMessage.WorkerSupportsCancellation = true;
            // backgroundWorkerMessage.RunWorkerAsync();
-            
+            sendMessageWaitHandle = new AutoResetEvent(false);
              
             _rxMessages = new Thread(new ThreadStart(getMessageThread));
-            _rxMessages.Name = "rxMessages";
-            _txMessage = new Thread(new ThreadStart(sendMessageThread));
+           _rxMessages.Name = "rxMessages";
+
+    
+           _txMessage = new Thread(new ThreadStart(sendMessageThread));
+  
             _txMessage.Name = "txMessage";
 
             _rxMessages.Start();
             _txMessage.Start();
 
-            for (int i = 1; i <= 255; i++)
-            {
-                ComboItems.Add(string.Format("{0:x}", i));
-            }
+          //  for (int i = 1; i <= 255; i++)
+          //  {
+          //      ComboItems.Add(string.Format("{0:x}", i));
+          //  }
 
-            zoneCombo.ItemsSource = ComboItems;
-            unitCombo.ItemsSource = ComboItems;
-            sendMessageWaitHandle = new AutoResetEvent(false);
+          //  zoneCombo.ItemsSource = ComboItems;
+          //  unitCombo.ItemsSource = ComboItems;
+            
             
         }
 
@@ -573,47 +580,54 @@ namespace WpfApplication1
 
         private void sendMessageThread() //************THREAD********************
         {
-            while (!shouldStopSendMessageThread)
+            try
             {
-                sendMessageWaitHandle.WaitOne(); // blocks thread untill signall is recived 
-                while (_allLists.txMessageQueue.Count != 0)
+                while (!shouldStopSendMessageThread)
                 {
-                    txMessage toSend = _allLists.txMessageQueue.Dequeue();
-
-                    foreach (var key in _allLists.allTagList.ToList())
+                    sendMessageWaitHandle.WaitOne(); // blocks thread untill signall is recived 
+                    while (_allLists.txMessageQueue.Count != 0)
                     {
-                        if (key.zoneID == toSend.ZoneID)
+                        txMessage toSend = _allLists.txMessageQueue.Dequeue();
+
+                        foreach (var key in _allLists.allTagList.ToList())
                         {
-                            if (key.unitID == toSend.UnitID)
+                            if (key.zoneID == toSend.ZoneID)
                             {
-                                //byte u8Sequence = (byte)System.Convert.ToByte(textBox3.Text.ToString());
-                                SendDataEvent(constructMessage(toSend.flag, key.TagAdd, toSend.u8Sequence));
-
-                                //while (ackBack(toSend.u8Sequence) == false)
-                                //{
-                                //    SendDataEvent(constructMessage(toSend.flag, key.TagAdd, toSend.u8Sequence));
-                                //    MessageBox.Show("Warning:no ack back");
-                                 
-
-                                //}
-
-                                if (ackBack(toSend.u8Sequence) == false)
+                                if (key.unitID == toSend.UnitID)
                                 {
-                                    MessageBox.Show("Warning:no ack back");
+                                    //byte u8Sequence = (byte)System.Convert.ToByte(textBox3.Text.ToString());
+                                    SendDataEvent(constructMessage(toSend.flag, key.TagAdd, toSend.u8Sequence));
+
+                                    //while (ackBack(toSend.u8Sequence) == false)
+                                    //{
+                                    //    SendDataEvent(constructMessage(toSend.flag, key.TagAdd, toSend.u8Sequence));
+                                    //    MessageBox.Show("Warning:no ack back");
+
+
+                                    //}
+
+                                    if (ackBack(toSend.u8Sequence) == false)
+                                    {
+                                        MessageBox.Show("Warning:no ack back");
+                                    }
+                                    else
+                                    {
+                                    }
+
+
+                                    // incrementSequence();
+
+
                                 }
-                                else
-                                {
-                                }
-
-
-                               // incrementSequence();
-
-
                             }
                         }
                     }
+
                 }
-                
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
             }
         }
 

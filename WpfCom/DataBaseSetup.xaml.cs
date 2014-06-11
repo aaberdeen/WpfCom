@@ -10,7 +10,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using ComPort;
+//using ComPort;
 
 namespace WpfApplication1
 {
@@ -96,32 +96,32 @@ namespace WpfApplication1
 
         private void button1_Click(object sender, RoutedEventArgs e)
         {
-            DBConnect tempConnect;
-            string password = null;
+            //DBConnect tempConnect;
+            //string password = null;
             
-            if (textBoxPassword.Text == "")
-            {
-                password = null;
-            }
-            else
-            {
-                password = textBoxPassword.Text;
-            }
+            //if (textBoxPassword.Text == "")
+            //{
+            //    password = null;
+            //}
+            //else
+            //{
+            //    password = textBoxPassword.Text;
+            //}
 
-            tempConnect = new DBConnect(textBoxServer.Text,
-                                        textBoxPort.Text,
-                                           "",
-                                           textBoxUID.Text,
-                                           password); //initialises new db connection
+            //tempConnect = new DBConnect(textBoxServer.Text,
+            //                            textBoxPort.Text,
+            //                               "",
+            //                               textBoxUID.Text,
+            //                               password); //initialises new db connection
 
-            tempConnect.exicuteScript("wpanSchema.sql");
+            //tempConnect.exicuteScript("wpanSchema.sql");
 
-            tempConnect = new DBConnect(textBoxServer.Text,
-                                        textBoxPort.Text,
-                                           "wpandb",
-                                           textBoxUID.Text,
-                                           password); //initialises new db connection
-            tempConnect.exicuteScript("wpanTable.sql");
+            //tempConnect = new DBConnect(textBoxServer.Text,
+            //                            textBoxPort.Text,
+            //                               "wpandb",
+            //                               textBoxUID.Text,
+            //                               password); //initialises new db connection
+            //tempConnect.exicuteScript("wpanTable.sql");
         }
     }
 }

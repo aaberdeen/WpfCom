@@ -60,6 +60,7 @@ namespace WpfApplication1
             //_splashThread.SetApartmentState(ApartmentState.STA);
             //_splashThread.Name = "_splashThread";
             //_splashThread.IsBackground = true;
+            _ethernetConnectWaitHandle = new AutoResetEvent(false);
             _connectionThread = new Thread(new ThreadStart(connectionThread));
             _connectionThread.Name = "_connectionThread";
             //_splashThread.IsBackground = true;
@@ -67,11 +68,11 @@ namespace WpfApplication1
             //subscribe4(comSetup1);
             _timerTree.Interval = new TimeSpan(0, 0, 10);
             _timerTree.Tick += new EventHandler(timerTree_Tick);
-            _messageWindow1 = new Message(ref EthernetConnection.allLists);
+             _messageWindow1 = new Message(ref EthernetConnection.allLists);
             subscribe(_comSetup1);
-            subscribe2(_messageWindow1);
+            //subscribe2(_messageWindow1);
             LoadConfig();
-            _ethernetConnectWaitHandle = new AutoResetEvent(false);
+            
             //messageWindow1 = new Message(ref allLists);
             //dataGridView1.AutoGenerateColumns = true;
         }
@@ -333,7 +334,14 @@ namespace WpfApplication1
         {
             if ((_connectionThread.ThreadState == System.Threading.ThreadState.Unstarted) | (_connectionThread.ThreadState == System.Threading.ThreadState.Stopped))
             {
-                _connectionThread.Start();
+                try
+                {
+                    _connectionThread.Start();
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show(ex.ToString());
+                }
             }
             _ethernetConnectWaitHandle.Set();
             //historyDataBaseSetup();
@@ -952,23 +960,26 @@ namespace WpfApplication1
         private void DataGrid_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             DataGrid temp = sender as DataGrid;
-            int col = temp.CurrentCell.Column.DisplayIndex;
-            string colName = temp.CurrentCell.Column.Header.ToString();
-            if (colName == "remoteLockout")
-            {             
-                int row = dataGridPullkey.SelectedIndex;
-                if (EthernetConnection.allLists.allTagList[row].remoteLockout == false)
-                {
-                    _messageWindow1.addMessageToTxQueue(EthernetConnection.allLists.allTagList[row].zoneID, EthernetConnection.allLists.allTagList[row].unitID, 0x55, 0x01);
-                }
-                else
-                {
-                    _messageWindow1.addMessageToTxQueue(EthernetConnection.allLists.allTagList[row].zoneID, EthernetConnection.allLists.allTagList[row].unitID, 0x55, 0x00);
-                }
-            }
-            if (colName == "minersName")
+            if (temp.CurrentCell.Column != null)
             {
-                _minersNamesForm.Show();
+                int col = temp.CurrentCell.Column.DisplayIndex;
+                string colName = temp.CurrentCell.Column.Header.ToString();
+                if (colName == "remoteLockout")
+                {
+                    int row = dataGridPullkey.SelectedIndex;
+                    if (EthernetConnection.allLists.allTagList[row].remoteLockout == false)
+                    {
+                        _messageWindow1.addMessageToTxQueue(EthernetConnection.allLists.allTagList[row].zoneID, EthernetConnection.allLists.allTagList[row].unitID, 0x55, 0x01);
+                    }
+                    else
+                    {
+                        _messageWindow1.addMessageToTxQueue(EthernetConnection.allLists.allTagList[row].zoneID, EthernetConnection.allLists.allTagList[row].unitID, 0x55, 0x00);
+                    }
+                }
+                if (colName == "minersName")
+                {
+                    _minersNamesForm.Show();
+                }
             }
         }
         /// <summary>
