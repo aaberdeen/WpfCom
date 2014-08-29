@@ -185,7 +185,7 @@ namespace WpfApplication1
         {
             IPEndPoint remoteSender = new IPEndPoint(IPAddress.Any, 0);
             IPAddress udpAddress;
-            int remotePort = 1000;  // 0 listens to all ports rich uses 1000;
+            int remotePort = 4440;// 1000;  // 0 listens to all ports rich uses 1000;
             if (IPAddress.TryParse(_coordData.IP, out udpAddress))
             {
                 remoteSender.Address = udpAddress;
